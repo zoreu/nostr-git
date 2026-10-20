@@ -255,7 +255,15 @@ async function createSub(args) {
   const message = flags.get('message') || `versão ${label} (commit ${shortHash(targetCommit)})`;
   const result = await runGit(['tag', '-a', label, '-m', message, targetCommit], { cwd: root });
   if (result.code !== 0) {
-    die(`Falha ao criar a versão: ${result.stderr.toString('utf8').trim()}`);
+    const reason = result.stderr.toString('utf8').trim();
+    if (/user\.name|user\.email|who you are/i.test(reason)) {
+      die(
+        'Sem identidade Git para criar a tag anotada. Configure antes:\n' +
+          `  ${ui.dim('git config --global user.name "Seu Nome"')}\n` +
+          `  ${ui.dim('git config --global user.email "voce@exemplo.com"')}`
+      );
+    }
+    die(`Falha ao criar a versão: ${reason}`);
   }
 
   const head = await headCommit(root);

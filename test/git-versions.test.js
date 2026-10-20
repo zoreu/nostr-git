@@ -22,24 +22,24 @@ test('listTags/resolveCommit lêm tags anotadas e resolvem commits', async () =>
   const root = await makeTempRepo();
 
   try {
-    await runGitText(['init', '-b', 'main'], { cwd: root });
+    await runGitText(['init', '-b', 'main'], { cwd: root, env: GIT_ENV });
 
     await writeFile(path.join(root, 'arquivo.txt'), 'primeira versão\n', 'utf8');
-    await runGitText(['add', '.'], { cwd: root });
+    await runGitText(['add', '.'], { cwd: root, env: GIT_ENV });
 
     let commitProcess = await runGit(['commit', '-m', 'primeiro commit'], { cwd: root, env: GIT_ENV });
     assert.equal(commitProcess.code, 0);
 
     const commitA = await headCommit(root);
-    await runGitText(['tag', '-a', 'v1.0.0', '-m', 'versão inicial'], { cwd: root });
+    await runGitText(['tag', '-a', 'v1.0.0', '-m', 'versão inicial'], { cwd: root, env: GIT_ENV });
 
     await writeFile(path.join(root, 'arquivo.txt'), 'segunda versão\n', 'utf8');
-    await runGitText(['add', '.'], { cwd: root });
+    await runGitText(['add', '.'], { cwd: root, env: GIT_ENV });
     commitProcess = await runGit(['commit', '-m', 'subiu de versão'], { cwd: root, env: GIT_ENV });
     assert.equal(commitProcess.code, 0);
 
     const commitB = await headCommit(root);
-    await runGitText(['tag', '-a', 'v2.1.0', '-m', 'nova versão'], { cwd: root });
+    await runGitText(['tag', '-a', 'v2.1.0', '-m', 'nova versão'], { cwd: root, env: GIT_ENV });
 
     const tags = (await listTags(root)).filter((tag) => isVersionLabel(tag.name));
     assert.deepEqual(
