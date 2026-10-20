@@ -7,7 +7,7 @@ O `ngit` usa o Git que você já conhece para versionar arquivos localmente. No 
 Sem servidor central, sem conta em plataforma: sua identidade é um par de chaves Nostr.
 
 ```
-npm install -g nostr-git
+npm install -g github:zoreu/nostr-git
 ngit login --generate
 ngit init
 ngit add .
@@ -43,13 +43,13 @@ npm install -g nostr-git
 Direto do GitHub:
 
 ```bash
-npm install -g github:SEU-USUARIO/nostr-git
+npm install -g github:zoreu/nostr-git
 ```
 
 Para desenvolvimento local:
 
 ```bash
-git clone https://github.com/SEU-USUARIO/nostr-git.git
+git clone https://github.com/zoreu/nostr-git.git
 cd nostr-git
 npm install
 npm link
