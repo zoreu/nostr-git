@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { downloadBlob } from './blossom.js';
 import { loadGlobalConfig } from './config.js';
-import { isTextPath, validateManifest } from './manifest.js';
+import { decodeText, isTextPath, validateManifest } from './manifest.js';
 import { normalizePubkey, pubkeyToNpub, queryEvents } from './nostr.js';
 import {
   REPO_ANNOUNCEMENT_KIND,
@@ -191,7 +191,7 @@ export function createWebApp({ relays, blossomServers }) {
           const file = await readFileEntry(data, entry.path);
           readme = {
             path: entry.path,
-            content: file.buffer.toString('utf8'),
+            content: decodeText(file.buffer),
           };
         } catch {
           readme = null;
@@ -237,7 +237,7 @@ export function createWebApp({ relays, blossomServers }) {
       size: entry.size,
       mime: entry.mime,
       text,
-      content: text ? buffer.toString('utf8') : null,
+      content: text ? decodeText(buffer) : null,
       binary: !text,
       rawUrl: `/api/raw/${encodeURIComponent(data.npub)}/${encodeURIComponent(
         project
@@ -250,16 +250,19 @@ export function createWebApp({ relays, blossomServers }) {
     const { entry, buffer } = await readFileEntry(data, filePath);
     const disposition = download ? 'attachment' : 'inline';
     const safeName = entry.path.split('/').pop().replace(/["\\]/g, '_');
+    const inlineText =
+      !download && isTextPath(entry.path) && buffer.length <= TEXT_PREVIEW_LIMIT;
+    const payload = inlineText ? Buffer.from(decodeText(buffer), 'utf8') : buffer;
     response.writeHead(200, {
       'Content-Type': entry.mime || 'application/octet-stream',
-      'Content-Length': buffer.length,
+      'Content-Length': payload.length,
       'Content-Disposition': `${disposition}; filename="${safeName}"`,
       'Cache-Control': 'public, max-age=300',
       'X-Content-Type-Options': 'nosniff',
       'Content-Security-Policy': "sandbox; default-src 'none'",
       'Cross-Origin-Resource-Policy': 'same-origin',
     });
-    response.end(buffer);
+    response.end(payload);
   }
 
   async function listRepos(filter, limit) {

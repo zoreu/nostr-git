@@ -111,6 +111,17 @@ export function isTextPath(filePath) {
   return TEXT_EXTENSIONS.has(path.extname(base));
 }
 
+const utf8Strict = new TextDecoder('utf-8', { fatal: true });
+const windows1252 = new TextDecoder('windows-1252');
+
+export function decodeText(buffer) {
+  try {
+    return utf8Strict.decode(buffer);
+  } catch {
+    return windows1252.decode(buffer);
+  }
+}
+
 export async function collectSnapshot(root, ref = 'HEAD') {
   const tree = await readTree(root, ref);
   const files = [];
