@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>ngit — Git no Nostr</title>
+    <meta
+      name="description"
+      content="Navegue por repositórios Git descentralizados publicados no Nostr e armazenados no Blossom."
+    />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/assets/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="#/" aria-label="ngit início">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" role="img">
+              <circle cx="16" cy="16" r="11" />
+              <circle cx="16" cy="16" r="3.5" />
+              <path d="M16 5v7M16 20v7M5 16h7M20 16h7" />
+            </svg>
+          </span>
+          <span>ngit</span>
+        </a>
+
+        <form class="top-search" id="top-search" autocomplete="off">
+          <svg viewBox="0 0 16 16" aria-hidden="true">
+            <path
+              d="M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z"
+            />
+          </svg>
+          <input
+            id="top-search-input"
+            type="search"
+            placeholder="npub1.../projeto"
+            aria-label="Buscar repositório"
+            spellcheck="false"
+          />
+        </form>
+
+        <nav class="topnav">
+          <a href="#/explore">Explorar</a>
+          <span class="me-chip" id="me-chip"></span>
+        </nav>
+      </div>
+    </header>
+
+    <main id="app" class="app"></main>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <footer class="footer">
+      <span><strong>ngit</strong> · Git descentralizado sobre Nostr + Blossom</span>
+      <span class="footer-dim">Os dados pertencem à sua chave.</span>
+    </footer>
+
+    <script type="module" src="/assets/app.js"></script>
+  </body>
+</html>
