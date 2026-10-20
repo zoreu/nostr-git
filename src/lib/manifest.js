@@ -153,6 +153,7 @@ export function buildManifest({
   commit,
   commits,
   files,
+  versions = [],
   description = '',
 }) {
   const serializedFiles = files.map((file) => ({
@@ -184,6 +185,11 @@ export function buildManifest({
       authorEmail: entry.authorEmail,
       date: entry.date,
       parents: entry.parents,
+    })),
+    versions: versions.map((entry) => ({
+      name: entry.name,
+      commit: entry.commit,
+      createdAt: entry.createdAt,
     })),
     tree: serializedFiles,
     readmePath: readme?.path || null,

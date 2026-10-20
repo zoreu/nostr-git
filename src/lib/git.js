@@ -172,6 +172,49 @@ export async function readLog(root, ref = 'HEAD', limit = 200) {
     });
 }
 
+export async function listTags(root) {
+  const raw = await runGitText(
+    [
+      'for-each-ref',
+      'refs/tags',
+      '--format=%(refname:short)%01%(*objectname)%01%(objectname)%01%(creatordate:iso-strict)%01%(contents:subject)',
+    ],
+    { cwd: root }
+  );
+  if (!raw) return [];
+  return raw.split(/\r?\n/).filter(Boolean).map((line) => {
+    const [name, peeled, tagObject, createdAt, message] = line.split('\x01');
+    return {
+      name,
+      commit: (peeled || tagObject || '').toLowerCase() || null,
+      createdAt: createdAt && createdAt !== '' ? createdAt : null,
+      message: message || '',
+    };
+  });
+}
+
+export async function resolveCommit(root, ref) {
+  const raw = String(ref || '').trim();
+  if (!raw) return null;
+  const result = await runGit(['rev-parse', '--verify', '--quiet', `${raw}^{commit}`], {
+    cwd: root,
+  });
+  return result.code === 0 ? result.stdout.toString('utf8').trim().toLowerCase() : null;
+}
+
+export async function isDetachedHead(root) {
+  const result = await runGit(['symbolic-ref', '--quiet', '--short', 'HEAD'], { cwd: root });
+  return result.code !== 0;
+}
+
+export async function checkoutRef(root, ref, { newBranch = null, force = false } = {}) {
+  const args = ['checkout'];
+  if (force) args.push('-f');
+  if (newBranch) args.push('-b', newBranch);
+  args.push(ref);
+  return runGitInteractive(args, { cwd: root });
+}
+
 export async function createBundle(root, file) {
   const result = await runGit(['bundle', 'create', file, '--all'], { cwd: root });
   if (result.code !== 0) {

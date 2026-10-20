@@ -437,6 +437,10 @@ function latestCommitBar(data) {
         <a href="${repoHash(data.repo.npub, data.repo.project, '/commits')}" title="${escapeHtml(commit.hash)}">
           ${escapeHtml(shortHash(commit.hash))}
         </a>
+        <button type="button" class="hash-copy hash-copy-icon" data-copy="${escapeHtml(commit.hash)}"
+          title="Copiar hash completo: ${escapeHtml(commit.hash)}">
+          ${icon('copy')}
+        </button>
         <span title="${escapeHtml(absoluteDate(commit.date))}">${escapeHtml(relativeTime(commit.date))}</span>
         <span>${data.manifest.stats.files} arquivo(s)</span>
       </div>
@@ -713,7 +717,10 @@ function commitsView(data) {
         </div>
       </div>
       <div class="commit-side">
-        <span class="hash">${escapeHtml(shortHash(commit.hash))}</span>
+        <button type="button" class="hash-copy" data-copy="${escapeHtml(commit.hash)}"
+          title="Copiar hash completo: ${escapeHtml(commit.hash)}">
+          ${icon('copy')} ${escapeHtml(shortHash(commit.hash))}
+        </button>
       </div>
     </article>
   `).join('');
@@ -723,8 +730,28 @@ function commitsView(data) {
       <span class="branch-chip">${icon('branch')} ${escapeHtml(data.repo.defaultBranch || 'main')}</span>
       <div class="toolbar-right">${data.manifest.commits.length} commit(s) no manifesto</div>
     </div>
+    ${versionsBar(data)}
     <div class="commits-list">
       ${rows || '<div class="empty-state"><strong>Nenhum commit</strong><span>Este repositório ainda não tem histórico.</span></div>'}
+    </div>
+  `;
+}
+
+function versionsBar(data) {
+  const versions = data.manifest.versions || [];
+  if (!versions.length) return '';
+  const chips = versions.map((version) => `
+    <button type="button" class="branch-chip version-chip"
+      data-copy="${escapeHtml(`ngit version switch ${version.name}`)}"
+      title="Copiar: ngit version switch ${escapeHtml(version.name)} (${escapeHtml(version.commit || '')})">
+      ${icon('copy')} ${escapeHtml(version.name)}
+      <span class="version-hash">${escapeHtml(shortHash(version.commit))}</span>
+    </button>
+  `).join('');
+  return `
+    <div class="toolbar versions-toolbar">
+      ${chips}
+      <div class="toolbar-right">clique para copiar o comando de troca</div>
     </div>
   `;
 }

@@ -7,7 +7,7 @@ O `ngit` usa o Git que você já conhece para versionar arquivos localmente. No 
 Sem servidor central, sem conta em plataforma: sua identidade é um par de chaves Nostr.
 
 ```
-npm install -g github:zoreu/nostr-git
+npm install -g nostr-git
 ngit login --generate
 ngit init
 ngit add .
@@ -22,6 +22,7 @@ ngit web
 - Identidade Nostr via `nsec` (ou geração de chave nova).
 - Arquivos armazenados em servidores Blossom com verificação de SHA-256.
 - Histórico completo transportado como bundle Git.
+- Versões SemVer dos commits: `ngit version create/list/switch` (tags v annotadas).
 - Manifesto web com árvore de arquivos, README e commits.
 - Interface local no estilo GitHub: `ngit web`.
 - Seleção automática entre vários relays e servidores Blossom.
@@ -166,10 +167,60 @@ ngit web --port 4000 --host 127.0.0.1 --no-open
 | `ngit whoami` | Mostra a identidade logada |
 | `ngit add <arquivos...>` | Adiciona arquivos ao índice Git |
 | `ngit commit [-m "msg"]` | Cria um commit usando o Git local |
+| `ngit version [create/list/switch]` | Cria/lista versões e troca para uma versão ou hash |
+| `ngit branch [list/new/switch]` | Lista/cria/troca de branch |
 | `ngit push` | Publica commits, bundle, manifesto e arquivos |
 | `ngit clone <npub.../projeto> [pasta]` | Clona um repositório do Nostr |
 | `ngit web [npub.../projeto]` | Abre a interface web local |
 | `ngit help` | Mostra a ajuda |
+
+## Versões
+
+Ngit usa tags Git anotadas no padrão SemVer (`vX.Y.Z`) para versionar commits.
+
+Criar uma versão:
+
+```bash
+ngit version create v1.0.0
+ngit version create --patch              # sobe patch automaticamente (v1.0.0 -> v1.0.1)
+ngit version create --minor -m "novo recurso"
+ngit version create v1.1.0 a1b2c3d       # versiona um commit específico pelo hash
+```
+
+Listar as versões:
+
+```bash
+ngit version list
+→ v1.0.1       a9b886d  2026-10-20  versão v1.0.1
+  v1.0.0       80f0ec4  2026-10-20  versão v1.0.0
+```
+
+Trocar para uma versão ou commit (o bundle traz o histórico completo, então funciona mesmo no clone):
+
+```bash
+ngit version switch v1.0.0        # por versão (aceita "1.0.0" sem o v)
+ngit version switch a1b2c3d       # por hash (abreviado ou completo)
+ngit version switch latest        # de volta à última versão
+```
+
+Em HEAD destacado o push é bloqueado; para publicar esse estado, crie uma branch:
+
+```bash
+ngit version switch v1.0.0 --branch correcao-1.0.0
+```
+
+As versões são enviadas no manifesto a cada `ngit push`, então o clone em outra máquina enxerga as mesmas tags.
+
+## Branches
+
+```bash
+ngit branch list                    # lista as branches locais (marcada com →)
+ngit branch new hotfix              # cria "hotfix" no commit atual e troca p/ ela
+ngit branch switch main             # troca para uma branch existente
+ngit branch checkout novidade       # troca se existir; senão cria
+```
+
+Para publicar uma branch no Nostr, basta estar nela e rodar `ngit push` — o estado governa a branch atual (`HEAD` na publicação), e o evento de estado guarda qual foi. As branches **locais** viajam sempre dentro do bundle Git completo; portanto, o `ngit clone` recebe todas elas, e `ngit branch list`/`ngit branch switch` funcionam direto no clone.
 
 ## Como funciona
 
@@ -289,8 +340,8 @@ Estrutura:
 
 ```
 bin/            entrada da CLI
-src/commands/   init, login, add, commit, push, clone, web
-src/lib/        Git, Nostr, Blossom, protocolo, manifesto e servidor web
+src/commands/   init, login, add, commit, push, clone, version, web
+src/lib/        Git, Nostr, Blossom, protocolo, manifesto, semver e servidor web
 web/            interface HTML/CSS/JS
 test/           testes unitários
 ```

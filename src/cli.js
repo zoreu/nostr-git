@@ -15,6 +15,8 @@ ${ui.bold('Comandos:')}
   ${ui.cyan('commit')} [-m "mensagem"]             Cria um commit
   ${ui.cyan('push')}                               Publica commits, bundle e arquivos no Nostr/Blossom
   ${ui.cyan('clone')} <npub.../projeto> [pasta]    Clona um repositório a partir do Nostr
+  ${ui.cyan('version')} <sub>                      Cria/lista versões e troca para uma versão ou hash
+  ${ui.cyan('branch')} <sub>                       Lista/cria/troca de branch
   ${ui.cyan('web')} [npub.../projeto]              Abre a interface web para navegar nos repositórios
   ${ui.cyan('whoami')}                             Mostra a identidade logada
   ${ui.cyan('help')}                               Mostra esta ajuda
@@ -29,13 +31,25 @@ ${ui.bold('Opções de web:')}
   --host 127.0.0.1           Endereço de escuta
   --no-open                  Não abre o navegador automaticamente
 
+${ui.bold('Opções de version:')}
+  ngit version list                            Lista as versões (tags vSemVer)
+  ngit version create [vX.Y.Z] [--patch]       Cria uma versão (tag anotada)
+  ngit version switch <versão|hash|latest>     Troca o repo para uma versão/commit
+  Veja todos os detalhes com: ngit version help
+
 ${ui.bold('Exemplos:')}
   ngit init
   ngit login --generate
   ngit add .
   ngit commit -m "primeiro commit"
+  ngit version create v1.0.0
   ngit push
   ngit clone npub1abc.../meu-projeto
+  ngit version switch v1.0.0
+  ngit version switch a1b2c3d
+  ngit branch list
+  ngit branch new hotfix
+  ngit branch switch main
   ngit web npub1abc.../meu-projeto
 
 ${ui.bold('Variáveis de ambiente:')}
@@ -50,7 +64,7 @@ function wantsHelp(args) {
 }
 
 export async function main(argv) {
-  if (argv[0] === '--version' || argv[0] === '-v' || argv[0] === 'version') {
+  if (argv[0] === '--version' || argv[0] === '-v') {
     info(packageJson.version);
     return;
   }
@@ -97,6 +111,16 @@ export async function main(argv) {
     case 'clone': {
       const { cloneCommand } = await import('./commands/clone.js');
       await cloneCommand(args);
+      break;
+    }
+    case 'version': {
+      const { versionCommand } = await import('./commands/version.js');
+      await versionCommand(args);
+      break;
+    }
+    case 'branch': {
+      const { branchCommand } = await import('./commands/branch.js');
+      await branchCommand(args);
       break;
     }
     case 'web': {

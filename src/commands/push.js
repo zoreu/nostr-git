@@ -14,6 +14,7 @@ import {
   ensureNgitExcluded,
   headCommit,
   hasCommits,
+  listTags,
   readLog,
   requireRepoRoot,
   setNostrRemote,
@@ -36,6 +37,7 @@ import {
   ui,
   warn,
 } from '../lib/ui.js';
+import { isVersionLabel, sortVersions } from '../lib/semver.js';
 
 function printPublishReport(label, result) {
   info(`${label} ${ui.dim(`(${result.relays.length} relay(s))`)}`);
@@ -126,6 +128,9 @@ export async function pushCommand() {
     );
 
     const commits = await readLog(root, commit, 200);
+    const versions = sortVersions(
+      (await listTags(root)).filter((entry) => isVersionLabel(entry.name))
+    ).slice(0, 50);
     const manifest = buildManifest({
       project,
       npub: config.npub,
@@ -134,6 +139,7 @@ export async function pushCommand() {
       commit,
       commits,
       files,
+      versions,
       description: repo.description || '',
     });
     const manifestBuffer = Buffer.from(JSON.stringify(manifest), 'utf8');
