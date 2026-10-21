@@ -213,8 +213,8 @@ export function buildManifest({
 }
 
 export function validateManifest(value) {
-  if (!value || typeof value !== 'object') throw new Error('Manifesto inválido.');
-  if (value.version !== 1) throw new Error('Versão de manifesto não suportada.');
-  if (!Array.isArray(value.tree)) throw new Error('Manifesto sem árvore de arquivos.');
+  if (!value || typeof value !== 'object') throw new Error('Invalid manifest.');
+  if (value.version !== 1) throw new Error('Unsupported manifest version.');
+  if (!Array.isArray(value.tree)) throw new Error('Manifest has no file tree.');
   return value;
 }

@@ -21,31 +21,31 @@ import {
 import { die, info, shortHash, success, ui, warn } from '../lib/ui.js';
 
 const VERSION_HELP = `
-${ui.bold('Uso:')} ngit version <subcomando> [opções]
+${ui.bold('Usage:')} ngit version <subcommand> [options]
 
-${ui.bold('Subcomandos:')}
-  ${ui.cyan('list')}                                   Lista as versões criadas (tags vSemVer)
-  ${ui.cyan('create')} [vX.Y.Z] [hash] [-m "msg"]      Cria uma versão em um commit
-  ${ui.cyan('switch')} <versão|hash|latest>            Troca para uma versão ou commit específico
-  ${ui.cyan('checkout')} <versão|hash|latest>          Apelido para o switch
-  ${ui.cyan('current')}                                 Mostra a versão e o commit atuais
+${ui.bold('Subcommands:')}
+  ${ui.cyan('list')}                                   Lists the created versions (vSemVer tags)
+  ${ui.cyan('create')} [vX.Y.Z] [hash] [-m "msg"]      Creates a version on a commit
+  ${ui.cyan('switch')} <version|hash|latest>           Switches to a version or a specific commit
+  ${ui.cyan('checkout')} <version|hash|latest>         Alias for switch
+  ${ui.cyan('current')}                                Shows the current version and commit
 
-${ui.bold('Opções de create:')}
-  --major, --minor, --patch   Incrementa a última versão (padrão: patch) em vez de informar vX.Y.Z
-  -m "mensagem"               Mensagem da versão (tag anotada)
+${ui.bold('Create options:')}
+  --major, --minor, --patch   Bumps the latest version (default: patch) instead of providing vX.Y.Z
+  -m "message"                Version message (annotated tag)
 
-${ui.bold('Opções de switch:')}
-  -b, --branch <nome>         Cria uma branch nova no commit escolhido (permite publicar depois)
-  --force, -f                 Descarta conflitos com alterações pendentes
+${ui.bold('Switch options:')}
+  -b, --branch <name>         Creates a new branch on the chosen commit (allows publishing later)
+  --force, -f                 Discards conflicts with pending changes
 
-${ui.bold('Exemplos:')}
+${ui.bold('Examples:')}
   ngit version create v1.0.0
   ngit version create
-  ngit version create --patch -m "correção"
+  ngit version create --patch -m "fix"
   ngit version list
   ngit version switch a1b2c3d
   ngit version switch v1.2.3
-  ngit version switch v1.2.3 --branch correcao-1.2.3
+  ngit version switch v1.2.3 --branch fix-1.2.3
   ngit version switch latest
 `;
 
@@ -59,7 +59,7 @@ function parseArgs(tokens) {
     if (token === '-m' || token === '--message') {
       const value = tokens[index + 1];
       if (!value || value.startsWith('-')) {
-        die(`A opção ${token} exige uma mensagem. Exemplo: -m "primeira versão"`);
+        die(`The option ${token} requires a message. Example: -m "first version"`);
       }
       flags.set('message', value);
       index += 1;
@@ -68,7 +68,7 @@ function parseArgs(tokens) {
     if (token === '-b' || token === '--branch') {
       const value = tokens[index + 1];
       if (!value || value.startsWith('-')) {
-        die(`A opção ${token} exige um nome de branch.`);
+        die(`The option ${token} requires a branch name.`);
       }
       flags.set('branch', value);
       index += 1;
@@ -83,7 +83,7 @@ function parseArgs(tokens) {
       continue;
     }
     if (token.startsWith('-')) {
-      die(`Opção desconhecida: ${token}`);
+      die(`Unknown option: ${token}`);
     }
     positional.push(token);
   }
@@ -110,10 +110,10 @@ async function readLocation(root) {
   return { branch, detached: branch === null };
 }
 
-function parseVersionLabel(value, kind = 'versão') {
+function parseVersionLabel(value, kind = 'version') {
   const label = versionToString(parseVersion(value));
   if (!label) {
-    die(`Formato de ${kind} inválido: "${value}". Use o padrão vX.Y.Z (v0.1.0, v1.2.3...).`);
+    die(`Invalid ${kind} format: "${value}". Use the vX.Y.Z pattern (v0.1.0, v1.2.3...).`);
   }
   return label;
 }
@@ -139,7 +139,7 @@ async function resolveRefArg(root, value) {
 
 async function assertHasCommits(root) {
   if (!(await hasCommits(root))) {
-    die('Nenhum commit ainda. Use "ngit add ." e "ngit commit -m \\"mensagem\\"" antes de versionar.');
+    die('No commits yet. Use "ngit add ." and "ngit commit -m \\"message\\"" before creating versions.');
   }
 }
 
@@ -153,15 +153,15 @@ async function listSub() {
 
   console.log('');
   info(
-    ui.bold('Versões:') +
-      ` ${ui.dim(`${versions.length} versão(ões) · em`)} ` +
-      (detached ? ui.cyan('(commit destacado)') : ui.cyan(branch)) +
+    ui.bold('Versions:') +
+      ` ${ui.dim(`${versions.length} version(s) · on`)} ` +
+      (detached ? ui.cyan('(detached commit)') : ui.cyan(branch)) +
       ui.dim(` @ ${shortHash(head)}`)
   );
 
   if (versions.length === 0) {
     info(
-      `${ui.dim('(nenhuma versão criada — começe com')} ${ui.cyan('ngit version create v0.1.0')}${ui.dim(')')}`
+      `${ui.dim('(no version yet — start with')} ${ui.cyan('ngit version create v0.1.0')}${ui.dim(')')}`
     );
   }
 
@@ -176,7 +176,7 @@ async function listSub() {
 
   console.log('');
   info(
-    `${ui.dim('troque de versão com:')} ${ui.cyan('ngit version switch <versão|hash|latest>')}`
+    `${ui.dim('switch version with:')} ${ui.cyan('ngit version switch <version|hash|latest>')}`
   );
 }
 
@@ -192,16 +192,16 @@ async function currentSub() {
   console.log('');
   info(`${ui.dim('commit:')}       ${ui.cyan(head)}`);
   info(
-    `${ui.dim('localização:')}  ${
-      current ? ui.cyan(current.name) : detached ? ui.cyan('(commit destacado)') : ui.cyan(branch)
+    `${ui.dim('location:')}  ${
+      current ? ui.cyan(current.name) : detached ? ui.cyan('(detached commit)') : ui.cyan(branch)
     } ${ui.dim(`@ ${shortHash(head)}`)}`
   );
   info(
-    `${ui.dim('versões de referência:')} ${ui.cyan('ngit version list')}`
+    `${ui.dim('reference versions:')} ${ui.cyan('ngit version list')}`
   );
 
   if (detached) {
-    warn('HEAD destacado. Para publicar este estado depois, use --branch ao trocar de versão.');
+    warn('HEAD is detached. To publish this state later, use --branch when switching versions.');
   }
 }
 
@@ -217,7 +217,7 @@ async function createSub(args) {
   const firstIsVersion = positional.length > 0 && isVersionLabel(positional[0]);
 
   if (bump && firstIsVersion) {
-    die('Informe a versão OU uma opção --major/--minor/--patch, não as duas coisas.');
+    die('Provide the version OR a --major/--minor/--patch option, not both.');
   }
 
   let label = null;
@@ -231,7 +231,7 @@ async function createSub(args) {
     label = versionToString(bumpVersion(latest?.name || 'v0.0.0', bump));
   } else {
     if (positional.length > 0) {
-      die(`Formato de versão inválido: "${positional[0]}". Use vX.Y.Z (ex.: v1.2.3).`);
+      die(`Invalid version format: "${positional[0]}". Use vX.Y.Z (e.g. v1.2.3).`);
     }
     refArg = 'HEAD';
     label = latest ? versionToString(bumpVersion(latest.name, 'patch')) : 'v0.1.0';
@@ -240,43 +240,43 @@ async function createSub(args) {
   const existing = versions.find((version) => version.name === label);
   if (existing) {
     die(
-      `A versão ${label} já existe em ${shortHash(existing.commit)}. Escolha outro número ou use --major/--minor/--patch.`
+      `Version ${label} already exists at ${shortHash(existing.commit)}. Choose another number or use --major/--minor/--patch.`
     );
   }
 
   const resolved = await resolveRefArg(root, refArg);
   if (!resolved) {
     die(
-      `Commit ou referência desconhecida: "${refArg}". Informe um hash válido ou use "ngit version list".`
+      `Unknown commit or reference: "${refArg}". Provide a valid hash or use "ngit version list".`
     );
   }
   const { commit: targetCommit } = resolved;
 
-  const message = flags.get('message') || `versão ${label} (commit ${shortHash(targetCommit)})`;
+  const message = flags.get('message') || `version ${label} (commit ${shortHash(targetCommit)})`;
   const result = await runGit(['tag', '-a', label, '-m', message, targetCommit], { cwd: root });
   if (result.code !== 0) {
     const reason = result.stderr.toString('utf8').trim();
     if (/user\.name|user\.email|who you are/i.test(reason)) {
       die(
-        'Sem identidade Git para criar a tag anotada. Configure antes:\n' +
-          `  ${ui.dim('git config --global user.name "Seu Nome"')}\n` +
-          `  ${ui.dim('git config --global user.email "voce@exemplo.com"')}`
+        'No Git identity to create the annotated tag. Configure it first:\n' +
+          `  ${ui.dim('git config --global user.name "Your Name"')}\n` +
+          `  ${ui.dim('git config --global user.email "you@example.com"')}`
       );
     }
-    die(`Falha ao criar a versão: ${reason}`);
+    die(`Failed to create the version: ${reason}`);
   }
 
   const head = await headCommit(root);
   console.log('');
-  success(`Versão ${ui.bold(label)} criada em ${ui.cyan(shortHash(targetCommit))}`);
-  info(`  ${ui.dim('mensagem:')} ${message}`);
+  success(`Version ${ui.bold(label)} created at ${ui.cyan(shortHash(targetCommit))}`);
+  info(`  ${ui.dim('message:')} ${message}`);
   if (targetCommit === head) {
     info(
-      `  ${ui.dim('próximo passo:')} ${ui.cyan('ngit push')} ${ui.dim('(o manifesto publicado incluirá as versões)')}`
+      `  ${ui.dim('next step:')} ${ui.cyan('ngit push')} ${ui.dim('(the published manifest will include the versions)')}`
     );
   } else {
     info(
-      `  ${ui.dim('para trocar para essa base depois:')} ${ui.cyan(`ngit version switch ${label}`)}`
+      `  ${ui.dim('to switch to this base later:')} ${ui.cyan(`ngit version switch ${label}`)}`
     );
   }
 }
@@ -287,7 +287,7 @@ async function switchSub(args, { subcommand = 'switch' } = {}) {
 
   const { positional, flags } = parseArgs(args);
   if (positional.length === 0) {
-    die(`Informe uma versão, hash ou "latest". Exemplo: ngit version ${subcommand} v1.2.3`);
+    die(`Provide a version, hash or "latest". Example: ngit version ${subcommand} v1.2.3`);
   }
 
   const requested = positional[0];
@@ -297,7 +297,7 @@ async function switchSub(args, { subcommand = 'switch' } = {}) {
   if (requested === 'latest') {
     const latest = versions[0];
     if (!latest) {
-      die('Nenhuma versão criada. Crie uma com "ngit version create".');
+      die('No version created. Create one with "ngit version create".');
     }
     const commit = await resolveCommit(root, latest.name);
     resolved = commit ? { commit, candidate: latest.name } : null;
@@ -308,9 +308,9 @@ async function switchSub(args, { subcommand = 'switch' } = {}) {
   if (!resolved) {
     const known = versions.map((entry) => entry.name).join(', ');
     die(
-      `"${requested}" não corresponde a nenhuma versão, branch ou commit conhecido.` +
-        (known ? `\nVersões conhecidas: ${known}` : '\nNenhuma versão criada ainda.') +
-        `\nVeja com: ${ui.cyan('ngit version list')}`
+      `"${requested}" does not match any known version, branch or commit.` +
+        (known ? `\nKnown versions: ${known}` : '\nNo versions created yet.') +
+        `\nSee: ${ui.cyan('ngit version list')}`
     );
   }
 
@@ -320,7 +320,7 @@ async function switchSub(args, { subcommand = 'switch' } = {}) {
   if (commit === head && !flags.has('branch')) {
     const current = versionAtCommit(versions, commit);
     info(
-      `Já está em ${ui.cyan(shortHash(commit))}${current ? ` ${ui.dim(`(${current.name})`)}` : ''}. Nada a fazer.`
+      `Already at ${ui.cyan(shortHash(commit))}${current ? ` ${ui.dim(`(${current.name})`)}` : ''}. Nothing to do.`
     );
     return;
   }
@@ -328,8 +328,8 @@ async function switchSub(args, { subcommand = 'switch' } = {}) {
   const dirty = await statusPorcelain(root);
   if (dirty && !flags.has('force')) {
     die(
-      'Existem alterações não commitadas. Faça um commit ("ngit add .", "ngit commit -m \\"msg\\"")' +
-        ' ou use --force para descartar conflitos.'
+      'There are uncommitted changes. Commit first ("ngit add .", "ngit commit -m \\"msg\\"")' +
+        ' or use --force to discard conflicts.'
     );
   }
 
@@ -343,17 +343,17 @@ async function switchSub(args, { subcommand = 'switch' } = {}) {
   const versionEntry = versionAtCommit(versions, commit);
   console.log('');
   success(
-    `Trocou para ${ui.bold(candidate)} ${ui.dim(`(${shortHash(commit)})`)}` +
+    `Switched to ${ui.bold(candidate)} ${ui.dim(`(${shortHash(commit)})`)}` +
       (versionEntry ? ` ${ui.dim(`· ${versionEntry.name}`)}` : '')
   );
 
   const detached = await isDetachedHead(root);
   if (newBranch) {
-    info(`  ${ui.dim('branch criada:')} ${ui.cyan(newBranch)} ${ui.dim('— agora é só "ngit add .", commit e "ngit push"')}`);
+    info(`  ${ui.dim('branch created:')} ${ui.cyan(newBranch)} ${ui.dim('— now just "ngit add .", commit and "ngit push"')}`);
   } else if (detached) {
-    warn('HEAD destacado: commits a partir daqui podem ser perdidos.');
-    info(`  ${ui.dim('para publicar este estado:')} ${ui.cyan(`ngit version switch ${candidate} --branch <nome>`)}`);
-    info(`  ${ui.dim('para voltar à ponta da branch:')} ${ui.cyan('ngit version switch <branch|latest>')}`);
+    warn('Detached HEAD: commits from here may be lost.');
+    info(`  ${ui.dim('to publish this state:')} ${ui.cyan(`ngit version switch ${candidate} --branch <name>`)}`);
+    info(`  ${ui.dim('to go back to the branch tip:')} ${ui.cyan('ngit version switch <branch|latest>')}`);
   }
 }
 
@@ -387,6 +387,6 @@ export async function versionCommand(args) {
       await currentSub();
       break;
     default:
-      die(`Subcomando de versão desconhecido: "${sub}". Use: list, create, switch, current ou help.`);
+      die(`Unknown version subcommand: "${sub}". Use: list, create, switch, current or help.`);
   }
 }

@@ -100,7 +100,7 @@ function relativeTime(input) {
   else date = new Date(input);
   if (Number.isNaN(date.getTime())) return '';
   const seconds = Math.round((date.getTime() - Date.now()) / 1000);
-  const formatter = new Intl.RelativeTimeFormat('pt-BR', { numeric: 'auto' });
+  const formatter = new Intl.RelativeTimeFormat('en-US', { numeric: 'auto' });
   const ranges = [
     ['year', 31536000],
     ['month', 2592000],
@@ -112,13 +112,13 @@ function relativeTime(input) {
   for (const [unit, value] of ranges) {
     if (Math.abs(seconds) >= value) return formatter.format(Math.round(seconds / value), unit);
   }
-  return 'agora';
+  return 'now';
 }
 
 function absoluteDate(input) {
   const date = new Date(input);
   if (Number.isNaN(date.getTime())) return '';
-  return new Intl.DateTimeFormat('pt-BR', {
+  return new Intl.DateTimeFormat('en-US', {
     dateStyle: 'medium',
     timeStyle: 'short',
   }).format(date);
@@ -163,9 +163,9 @@ function setMe(me) {
     meChip.classList.add('is-logged');
     meChip.title = me.npub;
   } else {
-    meChip.textContent = 'sem login';
+    meChip.textContent = 'not logged in';
     meChip.classList.remove('is-logged');
-    meChip.title = 'Rode "ngit login" no terminal';
+    meChip.title = 'Run "ngit login" in the terminal';
   }
 }
 
@@ -193,7 +193,7 @@ async function fetchJson(url) {
     data = {};
   }
   if (!response.ok) {
-    const error = new Error(data.error || `Erro HTTP ${response.status}`);
+    const error = new Error(data.error || `HTTP error ${response.status}`);
     error.status = response.status;
     throw error;
   }
@@ -201,7 +201,7 @@ async function fetchJson(url) {
 }
 
 function setDocumentTitle(title) {
-  document.title = title ? `${title} · ngit` : 'ngit — Git no Nostr';
+  document.title = title ? `${title} · ngit` : 'ngit — Git on Nostr';
 }
 
 function loadingView() {
@@ -221,7 +221,7 @@ function errorView(title, message, hint = '') {
       <h1>${escapeHtml(title)}</h1>
       <p>${escapeHtml(message)}</p>
       ${hint ? `<p>${hint}</p>` : ''}
-      <a class="btn" href="#/">Voltar ao início</a>
+      <a class="btn" href="#/">Back home</a>
     </div>
   `;
 }
@@ -240,7 +240,7 @@ function repoCard(repo) {
           <span>${escapeHtml(shortNpub(repo.npub))}</span>
         </div>
       </div>
-      <p class="repo-card-desc">${escapeHtml(repo.description || 'Sem descrição.')}</p>
+      <p class="repo-card-desc">${escapeHtml(repo.description || 'No description.')}</p>
       <div class="repo-card-meta">
         <span>${escapeHtml(relativeTime(repo.updatedAt))}</span>
         <span>Nostr + Blossom</span>
@@ -267,18 +267,18 @@ function steps() {
     <div class="steps">
       <div class="step">
         <span class="step-num">1</span>
-        <strong>Crie sua identidade</strong>
-        <span>Gere um par de chaves com <code>ngit login --generate</code>.</span>
+        <strong>Create your identity</strong>
+        <span>Generate a key pair with <code>ngit login --generate</code>.</span>
       </div>
       <div class="step">
         <span class="step-num">2</span>
-        <strong>Versione normalmente</strong>
-        <span><code>ngit init</code>, <code>ngit add .</code> e <code>ngit commit</code> usam Git de verdade.</span>
+        <strong>Version as usual</strong>
+        <span><code>ngit init</code>, <code>ngit add .</code> and <code>ngit commit</code> use real Git.</span>
       </div>
       <div class="step">
         <span class="step-num">3</span>
-        <strong>Publique no Nostr</strong>
-        <span><code>ngit push</code> envia os arquivos ao Blossom e as referências aos relays.</span>
+        <strong>Publish on Nostr</strong>
+        <span><code>ngit push</code> sends the files to Blossom and the references to the relays.</span>
       </div>
     </div>
   `;
@@ -299,63 +299,63 @@ async function renderHome(token) {
   app.innerHTML = `
     <section class="hero">
       <div>
-        <span class="eyebrow"><span class="eyebrow-dot"></span> protocolo aberto · sem servidor central</span>
-        <h1>Seu código no <span>Nostr</span>, com a força do Git.</h1>
+        <span class="eyebrow"><span class="eyebrow-dot"></span> open protocol · no central server</span>
+        <h1>Your code on <span>Nostr</span>, powered by Git.</h1>
         <p>
-          Publique repositórios usando relays Nostr para as referências e Blossom para os
-          arquivos. Qualquer pessoa com o seu npub pode clonar, auditar e navegar.
+          Publish repositories using Nostr relays for the references and Blossom for the
+          files. Anyone with your npub can clone, audit and browse.
         </p>
         <form class="hero-search" data-search>
-          <input name="target" type="search" placeholder="npub1.../meu-projeto" aria-label="Repositório" spellcheck="false" />
-          <button class="btn btn-primary btn-lg" type="submit">Abrir repositório</button>
+          <input name="target" type="search" placeholder="npub1.../my-project" aria-label="Repository" spellcheck="false" />
+          <button class="btn btn-primary btn-lg" type="submit">Open repository</button>
         </form>
-        <div class="search-hint">Instale com npm install -g nostr-git · clone com ngit clone npub.../projeto</div>
+        <div class="search-hint">Install with npm install -g nostr-git · clone with ngit clone npub.../project</div>
       </div>
-      <aside class="hero-panel" aria-label="Exemplo de uso">
+      <aside class="hero-panel" aria-label="Usage example">
         <div class="hero-panel-head"><i></i><i></i><i></i><span>ngit</span></div>
         <pre><span class="code-dim">$</span> npm install -g nostr-git
 <span class="code-dim">$</span> ngit login --generate
-<span class="code-green">✓</span> login realizado
+<span class="code-green">✓</span> logged in
 <span class="code-dim">$</span> ngit init
 <span class="code-dim">$</span> ngit add .
-<span class="code-dim">$</span> ngit commit -m <span class="code-blue">"primeiro commit"</span>
+<span class="code-dim">$</span> ngit commit -m <span class="code-blue">"first commit"</span>
 <span class="code-dim">$</span> ngit push
-<span class="code-purple">To</span> nostr://npub1.../projeto
-<span class="code-green">✓</span> publicado nos relays</pre>
+<span class="code-purple">To</span> nostr://npub1.../project
+<span class="code-green">✓</span> published on relays</pre>
       </aside>
     </section>
 
     <section class="section">
       <div class="section-head">
-        <h2>Seus repositórios</h2>
-        <p>${me.npub ? escapeHtml(shortNpub(me.npub)) : 'entre com ngit login para ver sua identidade'}</p>
+        <h2>Your repositories</h2>
+        <p>${me.npub ? escapeHtml(shortNpub(me.npub)) : 'log in with ngit login to see your identity'}</p>
       </div>
       ${
         me.npub
           ? own.repos.length
             ? repoGrid(own.repos)
             : emptyRepos(
-                'Nenhum repositório publicado com esta identidade.',
-                'Rode <code>ngit push</code> dentro de um projeto para publicar.'
+                'No repository published with this identity.',
+                'Run <code>ngit push</code> inside a project to publish.'
               )
           : emptyRepos(
-              'Nenhuma identidade conectada.',
-              'No terminal, rode <code>ngit login</code> ou <code>ngit login --generate</code>.'
+              'No identity connected.',
+              'In the terminal, run <code>ngit login</code> or <code>ngit login --generate</code>.'
             )
       }
     </section>
 
     <section class="section">
       <div class="section-head">
-        <h2>Repositórios recentes</h2>
-        <p>anúncios Nostr descobertos nos relays configurados</p>
+        <h2>Recent repositories</h2>
+        <p>Nostr announcements discovered on the configured relays</p>
       </div>
       ${
         explore.repos.length
           ? repoGrid(explore.repos)
           : emptyRepos(
-              'Nenhum repositório encontrado nos relays.',
-              'Os relays configurados podem estar vazios ou indisponíveis.'
+              'No repository found on the relays.',
+              'The configured relays may be empty or unavailable.'
             )
       }
     </section>
@@ -365,7 +365,7 @@ async function renderHome(token) {
 }
 
 async function renderExplore(token) {
-  setDocumentTitle('Explorar');
+  setDocumentTitle('Explore');
   app.innerHTML = loadingView();
   await getMe();
   const data = await fetchJson('/api/explore?limit=48');
@@ -373,15 +373,15 @@ async function renderExplore(token) {
 
   app.innerHTML = `
     <div class="page-title">
-      <h1>Explorar repositórios</h1>
-      <p>Repositórios Git anunciados publicamente nos relays Nostr configurados.</p>
+      <h1>Explore repositories</h1>
+      <p>Git repositories publicly announced on the configured Nostr relays.</p>
     </div>
     ${
       data.repos.length
         ? repoGrid(data.repos)
         : emptyRepos(
-            'Nenhum repositório encontrado.',
-            'Publique o primeiro com <code>ngit push</code> ou ajuste os relays com <code>NGIT_RELAYS</code>.'
+            'No repository found.',
+            'Publish the first one with <code>ngit push</code> or adjust the relays with <code>NGIT_RELAYS</code>.'
           )
     }
   `;
@@ -398,23 +398,23 @@ function repoHeader(data, active) {
             <span class="repo-owner">${escapeHtml(shortNpub(repo.npub))}</span>
             <span>/</span>
             <strong>${escapeHtml(repo.name || repo.project)}</strong>
-            <span class="badge">Público</span>
+            <span class="badge">Public</span>
           </h1>
         </div>
         ${repo.description ? `<p class="repo-desc">${escapeHtml(repo.description)}</p>` : ''}
       </div>
       <div class="repo-actions">
         <button class="btn" data-copy="${escapeHtml(`ngit clone ${repo.npub}/${repo.project}`)}">
-          ${icon('copy')} Copiar clone
+          ${icon('copy')} Copy clone
         </button>
         <a class="btn" href="${repoHash(repo.npub, repo.project)}">
-          ${icon('code')} Código
+          ${icon('code')} Code
         </a>
       </div>
     </div>
-    <nav class="repo-tabs" aria-label="Seções do repositório">
+    <nav class="repo-tabs" aria-label="Repository sections">
       <a class="repo-tab ${active === 'code' ? 'active' : ''}" href="${repoHash(repo.npub, repo.project)}">
-        ${icon('code')} Código
+        ${icon('code')} Code
       </a>
       <a class="repo-tab ${active === 'commits' ? 'active' : ''}" href="${repoHash(repo.npub, repo.project, '/commits')}">
         ${icon('commit')} Commits <span class="tab-count">${manifest.commits.length}</span>
@@ -430,19 +430,19 @@ function latestCommitBar(data) {
     <div class="commit-bar">
       <span class="avatar" title="${escapeHtml(commit.authorName || '')}">${escapeHtml(initials(commit.authorName))}</span>
       <div class="commit-main">
-        <span class="author">${escapeHtml(commit.authorName || 'anônimo')}</span>
-        <span class="subject">${escapeHtml(commit.subject || 'sem mensagem')}</span>
+        <span class="author">${escapeHtml(commit.authorName || 'anonymous')}</span>
+        <span class="subject">${escapeHtml(commit.subject || 'no message')}</span>
       </div>
       <div class="commit-meta">
         <a href="${repoHash(data.repo.npub, data.repo.project, '/commits')}" title="${escapeHtml(commit.hash)}">
           ${escapeHtml(shortHash(commit.hash))}
         </a>
         <button type="button" class="hash-copy hash-copy-icon" data-copy="${escapeHtml(commit.hash)}"
-          title="Copiar hash completo: ${escapeHtml(commit.hash)}">
+          title="Copy full hash: ${escapeHtml(commit.hash)}">
           ${icon('copy')}
         </button>
         <span title="${escapeHtml(absoluteDate(commit.date))}">${escapeHtml(relativeTime(commit.date))}</span>
-        <span>${data.manifest.stats.files} arquivo(s)</span>
+        <span>${data.manifest.stats.files} file(s)</span>
       </div>
     </div>
   `;
@@ -528,14 +528,14 @@ function treeView(data, currentPath) {
   }
 
   if (rows.length === 0) {
-    rows.push('<div class="empty-state"><strong>Diretório vazio</strong><span>Nenhum arquivo aqui.</span></div>');
+    rows.push('<div class="empty-state"><strong>Empty directory</strong><span>No files here.</span></div>');
   }
 
   return `
     <div class="explorer">
       <div class="explorer-head">
         <div class="breadcrumbs">${breadcrumbs(data, currentPath)}</div>
-        <span>${dirs.length + files.length} item(ns)</span>
+        <span>${dirs.length + files.length} item(s)</span>
       </div>
       ${rows.join('')}
     </div>
@@ -683,9 +683,9 @@ function fileView(data, file) {
   } else {
     body = `
       <div class="binary-view">
-        <strong>Pré-visualização não disponível</strong>
-        <span>${escapeHtml(file.mime || 'arquivo binário')} · ${formatBytes(file.size)}</span>
-        <a class="btn" href="${downloadUrl}">${icon('download')} Baixar arquivo</a>
+        <strong>Preview not available</strong>
+        <span>${escapeHtml(file.mime || 'binary file')} · ${formatBytes(file.size)}</span>
+        <a class="btn" href="${downloadUrl}">${icon('download')} Download file</a>
       </div>
     `;
   }
@@ -695,7 +695,7 @@ function fileView(data, file) {
       <div class="breadcrumbs">${breadcrumbs(data, file.path, { lastAsText: true })}</div>
       <div class="file-view-actions">
         <a class="btn" href="${file.rawUrl}" target="_blank" rel="noopener">${icon('file')} Raw</a>
-        <a class="btn" href="${downloadUrl}">${icon('download')} Baixar</a>
+        <a class="btn" href="${downloadUrl}">${icon('download')} Download</a>
       </div>
     </div>
     ${body}
@@ -706,19 +706,19 @@ function commitsView(data) {
   const rows = data.manifest.commits.map((commit) => `
     <article class="commit-row">
       <div>
-        <div class="commit-subject">${escapeHtml(commit.subject || 'sem mensagem')}</div>
+        <div class="commit-subject">${escapeHtml(commit.subject || 'no message')}</div>
         <div class="commit-byline">
           <span class="avatar sm">${escapeHtml(initials(commit.authorName))}</span>
-          <span>${escapeHtml(commit.authorName || 'anônimo')}</span>
+          <span>${escapeHtml(commit.authorName || 'anonymous')}</span>
           <span>·</span>
           <span title="${escapeHtml(absoluteDate(commit.date))}">${escapeHtml(relativeTime(commit.date))}</span>
           <span>·</span>
-          <span>${commit.parents.length > 0 ? `${commit.parents.length} pai(s)` : 'commit raiz'}</span>
+          <span>${commit.parents.length > 0 ? `${commit.parents.length} parent(s)` : 'root commit'}</span>
         </div>
       </div>
       <div class="commit-side">
         <button type="button" class="hash-copy" data-copy="${escapeHtml(commit.hash)}"
-          title="Copiar hash completo: ${escapeHtml(commit.hash)}">
+          title="Copy full hash: ${escapeHtml(commit.hash)}">
           ${icon('copy')} ${escapeHtml(shortHash(commit.hash))}
         </button>
       </div>
@@ -728,11 +728,11 @@ function commitsView(data) {
   return `
     <div class="toolbar">
       <span class="branch-chip">${icon('branch')} ${escapeHtml(data.repo.defaultBranch || 'main')}</span>
-      <div class="toolbar-right">${data.manifest.commits.length} commit(s) no manifesto</div>
+      <div class="toolbar-right">${data.manifest.commits.length} commit(s) in the manifest</div>
     </div>
     ${versionsBar(data)}
     <div class="commits-list">
-      ${rows || '<div class="empty-state"><strong>Nenhum commit</strong><span>Este repositório ainda não tem histórico.</span></div>'}
+      ${rows || '<div class="empty-state"><strong>No commits</strong><span>This repository has no history yet.</span></div>'}
     </div>
   `;
 }
@@ -743,7 +743,7 @@ function versionsBar(data) {
   const chips = versions.map((version) => `
     <button type="button" class="branch-chip version-chip"
       data-copy="${escapeHtml(`ngit version switch ${version.name}`)}"
-      title="Copiar: ngit version switch ${escapeHtml(version.name)} (${escapeHtml(version.commit || '')})">
+      title="Copy: ngit version switch ${escapeHtml(version.name)} (${escapeHtml(version.commit || '')})">
       ${icon('copy')} ${escapeHtml(version.name)}
       <span class="version-hash">${escapeHtml(shortHash(version.commit))}</span>
     </button>
@@ -751,7 +751,7 @@ function versionsBar(data) {
   return `
     <div class="toolbar versions-toolbar">
       ${chips}
-      <div class="toolbar-right">clique para copiar o comando de troca</div>
+      <div class="toolbar-right">click to copy the switch command</div>
     </div>
   `;
 }
@@ -785,7 +785,7 @@ async function renderRepo(route, token) {
     `;
   } else {
     content = `
-      ${branchToolbar(data, `<span>${data.manifest.stats.files} arquivo(s) · ${formatBytes(data.manifest.stats.bytes)}</span>`)}
+      ${branchToolbar(data, `<span>${data.manifest.stats.files} file(s) · ${formatBytes(data.manifest.stats.bytes)}</span>`)}
       ${latestCommitBar(data)}
       ${treeView(data, route.path || '')}
       ${route.path ? '' : readmeView(data)}
@@ -804,7 +804,7 @@ function parseHash() {
   try {
     parts = raw.split('/').filter(Boolean).map((part) => decodeURIComponent(part));
   } catch {
-    return { name: 'error', message: 'URL inválida.' };
+    return { name: 'error', message: 'Invalid URL.' };
   }
 
   if (parts.length === 0) return { name: 'home' };
@@ -812,7 +812,7 @@ function parseHash() {
 
   const npub = parts[0];
   const project = parts[1];
-  if (!project) return { name: 'error', message: 'Informe a identidade e o projeto na URL.' };
+  if (!project) return { name: 'error', message: 'Provide the identity and the project in the URL.' };
 
   if (parts[2] === 'commits') {
     return { name: 'repo', npub, project, view: 'commits' };
@@ -856,7 +856,7 @@ async function renderRoute() {
     }
 
     if (route.name === 'error') {
-      app.innerHTML = errorView('URL inválida', route.message);
+      app.innerHTML = errorView('Invalid URL', route.message);
       return;
     }
   } catch (error) {
@@ -866,17 +866,17 @@ async function renderRoute() {
     app.innerHTML = errorView(
       notFound
         ? isFile
-          ? 'Arquivo não encontrado'
-          : 'Repositório não encontrado'
-        : 'Não foi possível carregar',
+          ? 'File not found'
+          : 'Repository not found'
+        : 'Could not load',
       error.message || String(error),
       notFound
         ? isFile
-          ? 'O arquivo pode ter sido removido ou renomeado no último commit.'
-          : 'Verifique o npub, o nome do projeto e se o push já foi publicado nos relays.'
-        : 'Verifique sua conexão com os relays Nostr e os servidores Blossom.'
+          ? 'The file may have been removed or renamed in the last commit.'
+          : 'Check the npub, the project name and whether the push was already published on the relays.'
+        : 'Check your connection to the Nostr relays and the Blossom servers.'
     );
-    setDocumentTitle(notFound ? 'Não encontrado' : 'Erro');
+    setDocumentTitle(notFound ? 'Not found' : 'Error');
   }
 }
 
@@ -890,7 +890,7 @@ function navigateFromSearch(value) {
     const identity = raw.slice(0, slash);
     const project = raw.slice(slash + 1);
     if (!identity || !project) {
-      toast('Use o formato npub1.../projeto', 'err');
+      toast('Use the format npub1.../project', 'err');
       return;
     }
     location.hash = `#/${encodeURIComponent(identity)}/${encodeURIComponent(project)}`;
@@ -902,7 +902,7 @@ function navigateFromSearch(value) {
     return;
   }
 
-  toast('Informe também o npub: npub1.../projeto', 'err');
+  toast('Also provide the npub: npub1.../project', 'err');
 }
 
 topSearch.addEventListener('submit', (event) => {
@@ -923,8 +923,8 @@ document.addEventListener('click', (event) => {
   if (!button) return;
   event.preventDefault();
   copyText(button.dataset.copy)
-    .then(() => toast('Comando copiado para a área de transferência.'))
-    .catch(() => toast('Não foi possível copiar.', 'err'));
+    .then(() => toast('Command copied to clipboard.'))
+    .catch(() => toast('Could not copy.', 'err'));
 });
 
 window.addEventListener('hashchange', renderRoute);

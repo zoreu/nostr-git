@@ -18,28 +18,28 @@ async function makeTempRepo() {
   return mkdtemp(path.join(os.tmpdir(), 'ngit-version-test-'));
 }
 
-test('listTags/resolveCommit lêm tags anotadas e resolvem commits', async () => {
+test('listTags/resolveCommit read annotated tags and resolve commits', async () => {
   const root = await makeTempRepo();
 
   try {
     await runGitText(['init', '-b', 'main'], { cwd: root, env: GIT_ENV });
 
-    await writeFile(path.join(root, 'arquivo.txt'), 'primeira versão\n', 'utf8');
+    await writeFile(path.join(root, 'file.txt'), 'first version\n', 'utf8');
     await runGitText(['add', '.'], { cwd: root, env: GIT_ENV });
 
-    let commitProcess = await runGit(['commit', '-m', 'primeiro commit'], { cwd: root, env: GIT_ENV });
+    let commitProcess = await runGit(['commit', '-m', 'first commit'], { cwd: root, env: GIT_ENV });
     assert.equal(commitProcess.code, 0);
 
     const commitA = await headCommit(root);
-    await runGitText(['tag', '-a', 'v1.0.0', '-m', 'versão inicial'], { cwd: root, env: GIT_ENV });
+    await runGitText(['tag', '-a', 'v1.0.0', '-m', 'initial version'], { cwd: root, env: GIT_ENV });
 
-    await writeFile(path.join(root, 'arquivo.txt'), 'segunda versão\n', 'utf8');
+    await writeFile(path.join(root, 'file.txt'), 'second version\n', 'utf8');
     await runGitText(['add', '.'], { cwd: root, env: GIT_ENV });
-    commitProcess = await runGit(['commit', '-m', 'subiu de versão'], { cwd: root, env: GIT_ENV });
+    commitProcess = await runGit(['commit', '-m', 'version bump'], { cwd: root, env: GIT_ENV });
     assert.equal(commitProcess.code, 0);
 
     const commitB = await headCommit(root);
-    await runGitText(['tag', '-a', 'v2.1.0', '-m', 'nova versão'], { cwd: root, env: GIT_ENV });
+    await runGitText(['tag', '-a', 'v2.1.0', '-m', 'new version'], { cwd: root, env: GIT_ENV });
 
     const tags = (await listTags(root)).filter((tag) => isVersionLabel(tag.name));
     assert.deepEqual(
@@ -49,7 +49,7 @@ test('listTags/resolveCommit lêm tags anotadas e resolvem commits', async () =>
 
     assert.equal(sortVersions(tags)[1].commit, commitA);
     assert.equal(sortVersions(tags)[0].commit, commitB);
-    assert.match(sortVersions(tags)[1].message, /versão inicial/);
+    assert.match(sortVersions(tags)[1].message, /initial version/);
 
     assert.equal(await resolveCommit(root, 'v1.0.0'), commitA);
     assert.equal(await resolveCommit(root, '1.0.0'), null);

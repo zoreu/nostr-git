@@ -126,7 +126,7 @@ export function buildAnnouncementTemplate({
   const tags = makeClientTags([
     ['d', project],
     ['name', project],
-    ['description', description || 'Repositório Git descentralizado via Nostr + Blossom'],
+    ['description', description || 'Decentralized Git repository via Nostr + Blossom'],
     ['clone', `nostr://${npub}/${project}`],
     ['relays', ...relays],
     ...blossomServers.map((server) => ['blossom', server]),
@@ -139,7 +139,7 @@ export function buildAnnouncementTemplate({
     kind: REPO_ANNOUNCEMENT_KIND,
     created_at: createdAt,
     tags,
-    content: description || 'Repositório Git descentralizado via Nostr + Blossom',
+    content: description || 'Decentralized Git repository via Nostr + Blossom',
   };
 }
 
@@ -257,7 +257,7 @@ export function parseNostrUrl(value) {
   const slash = raw.indexOf('/');
   if (slash === -1) {
     throw new Error(
-      'Endereço inválido. Use o formato npub1.../pasta-projeto (ou nostr://npub1.../pasta-projeto).'
+      'Invalid address. Use the format npub1.../project-folder (or nostr://npub1.../project-folder).'
     );
   }
   return {

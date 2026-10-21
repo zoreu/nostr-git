@@ -116,7 +116,7 @@ export async function uploadBlob(
     reuse = true,
   }
 ) {
-  if (!secretKeyHex) throw new Error('Login necessário para enviar arquivos ao Blossom.');
+  if (!secretKeyHex) throw new Error('Login required to upload files to Blossom.');
   const data = Buffer.isBuffer(buffer) ? buffer : Buffer.from(buffer);
   const hash = sha256(data);
   const size = data.length;
@@ -167,7 +167,7 @@ export async function uploadBlob(
   }
 
   throw new Error(
-    `Não foi possível enviar o blob para nenhum servidor Blossom.\n${errors
+    `Could not upload the blob to any Blossom server.\n${errors
       .map((line) => `  - ${line}`)
       .join('\n')}`
   );
@@ -178,7 +178,7 @@ export async function downloadBlob(
   { servers = DEFAULT_BLOSSOM_SERVERS, timeoutMs = 120000, expectedSize = null } = {}
 ) {
   if (!hash || !/^[0-9a-f]{64}$/i.test(hash)) {
-    throw new Error('Hash de blob inválido.');
+    throw new Error('Invalid blob hash.');
   }
   const normalizedHash = hash.toLowerCase();
   const candidates = normalizeServerList(servers);
@@ -196,11 +196,11 @@ export async function downloadBlob(
       const buffer = Buffer.from(await response.arrayBuffer());
       const actual = sha256(buffer);
       if (actual !== normalizedHash) {
-        errors.push(`${server}: hash não confere`);
+        errors.push(`${server}: hash mismatch`);
         continue;
       }
       if (expectedSize !== null && buffer.length !== expectedSize) {
-        errors.push(`${server}: tamanho não confere`);
+        errors.push(`${server}: size mismatch`);
         continue;
       }
       return { buffer, server, hash: normalizedHash };
@@ -210,7 +210,7 @@ export async function downloadBlob(
   }
 
   throw new Error(
-    `Blob ${normalizedHash.slice(0, 12)}... não encontrado no Blossom.\n${errors
+    `Blob ${normalizedHash.slice(0, 12)}... not found on Blossom.\n${errors
       .map((line) => `  - ${line}`)
       .join('\n')}`
   );

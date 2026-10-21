@@ -1,39 +1,39 @@
 # ngit
 
-**Git descentralizado sobre Nostr + Blossom.**
+**Decentralized Git on Nostr + Blossom.**
 
-O `ngit` usa o Git que você já conhece para versionar arquivos localmente. No `push`, ele publica o histórico (bundle Git), os arquivos e um manifesto na rede Nostr/Blossom. No `clone`, ele descobre o repositório pelos relays, baixa o bundle do Blossom e reconstrói o repositório Git completo.
+`ngit` uses the Git you already know to version files locally. On `push`, it publishes the history (Git bundle), the files and a manifest to the Nostr/Blossom network. On `clone`, it discovers the repository through the relays, downloads the bundle from Blossom and rebuilds the full Git repository.
 
-Sem servidor central, sem conta em plataforma: sua identidade é um par de chaves Nostr.
+No central server, no platform account: your identity is a Nostr key pair.
 
 ```
 npm install -g nostr-git
 ngit login --generate
 ngit init
 ngit add .
-ngit commit -m "primeiro commit"
+ngit commit -m "first commit"
 ngit push
 ngit web
 ```
 
-## Recursos
+## Features
 
-- Comandos no estilo Git: `init`, `add`, `commit`, `push` e `clone`.
-- Identidade Nostr via `nsec` (ou geração de chave nova).
-- Arquivos armazenados em servidores Blossom com verificação de SHA-256.
-- Histórico completo transportado como bundle Git.
-- Versões SemVer dos commits: `ngit version create/list/switch` (tags v annotadas).
-- Manifesto web com árvore de arquivos, README e commits.
-- Interface local no estilo GitHub: `ngit web`.
-- Seleção automática entre vários relays e servidores Blossom.
-- Instalável diretamente de um repositório GitHub.
+- Git-style commands: `init`, `add`, `commit`, `push` and `clone`.
+- Nostr identity via `nsec` (or generate a new key).
+- Files stored on Blossom servers with SHA-256 verification.
+- Full history carried as a Git bundle.
+- SemVer versions for commits: `ngit version create/list/switch` (annotated v tags).
+- Web manifest with file tree, README and commits.
+- GitHub-like local interface: `ngit web`.
+- Automatic selection among multiple relays and Blossom servers.
+- Installable straight from a GitHub repository.
 
-## Requisitos
+## Requirements
 
-- Node.js 20 ou superior
-- Git 2.28 ou superior
+- Node.js 20 or newer
+- Git 2.28 or newer
 
-## Instalação
+## Installation
 
 Via npm:
 
@@ -41,13 +41,13 @@ Via npm:
 npm install -g nostr-git
 ```
 
-Direto do GitHub:
+Straight from GitHub:
 
 ```bash
 npm install -g github:zoreu/nostr-git
 ```
 
-Para desenvolvimento local:
+For local development:
 
 ```bash
 git clone https://github.com/zoreu/nostr-git.git
@@ -56,33 +56,33 @@ npm install
 npm link
 ```
 
-Depois confira:
+Then check:
 
 ```bash
 ngit --version
 ngit --help
 ```
 
-## Início rápido
+## Quick start
 
 ### 1. Login
 
-Crie uma identidade nova:
+Create a new identity:
 
 ```bash
 ngit login --generate
 ```
 
-Guarde o `nsec` exibido em local seguro. Ele é a única forma de controlar os repositórios publicados com essa identidade.
+Store the displayed `nsec` in a safe place. It is the only way to control the repositories published with that identity.
 
-Para usar uma identidade existente:
+To use an existing identity:
 
 ```bash
 ngit login
-# cole o nsec1... quando solicitado
+# paste the nsec1... when prompted
 ```
 
-Também é possível configurar relays e servidores Blossom:
+You can also configure relays and Blossom servers:
 
 ```bash
 ngit login \
@@ -90,185 +90,185 @@ ngit login \
   --blossom https://blossom.primal.net,https://nostr.download
 ```
 
-### 2. Publicar um projeto
+### 2. Publish a project
 
 ```bash
-cd meu-projeto
+cd my-project
 ngit init
 ngit add .
-ngit commit -m "primeiro commit"
+ngit commit -m "first commit"
 ngit push
 ```
 
-Saída parecida com a do Git:
+Output looks like Git's:
 
 ```
-Enumerando objetos...
-  3 arquivo(s), 167 B
-  bundle Git: 917 B
-Enviando conteúdo para o Blossom...
+Enumerating objects...
+  3 file(s), 167 B
+  Git bundle: 917 B
+Sending content to Blossom...
   ✓ bundle 593 B https://nostr.download
-  ✓ manifesto 1.37 KiB https://blossom.primal.net
-Publicando referências no Nostr...
-  ✓ wss://nos.lol aceito
+  ✓ manifest 1.37 KiB https://blossom.primal.net
+Publishing references on Nostr...
+  ✓ wss://nos.lol accepted
 
-To nostr://npub1vnd9.../meu-projeto
+To nostr://npub1vnd9.../my-project
    * [new branch]      main -> main
 ```
 
-O endereço final tem o formato:
+The final address has the format:
 
 ```
-nostr://npub1.../nome-do-projeto
+nostr://npub1.../project-name
 ```
 
-### 3. Clonar em outra máquina
+### 3. Clone on another machine
 
 ```bash
-ngit clone npub1.../meu-projeto
+ngit clone npub1.../my-project
 ```
 
-Ou escolha a pasta de destino:
+Or choose the destination folder:
 
 ```bash
-ngit clone npub1.../meu-projeto outra-pasta
+ngit clone npub1.../my-project other-folder
 ```
 
-O `clone` não exige login: qualquer pessoa com o `npub` pode baixar o repositório público.
+`clone` requires no login: anyone with the `npub` can download the public repository.
 
-### 4. Navegar na web
+### 4. Browse on the web
 
 ```bash
 ngit web
 ```
 
-Abre `http://127.0.0.1:3737` no navegador com:
+Opens `http://127.0.0.1:3737` in your browser with:
 
-- seus repositórios;
-- descoberta de repositórios recentes nos relays;
-- árvore de arquivos;
-- visualização de código e imagens;
-- README renderizado;
-- histórico de commits;
-- comando de clone pronto para copiar.
+- your repositories;
+- discovery of recent repositories on the relays;
+- file tree;
+- code and image viewing;
+- rendered README;
+- commit history;
+- clone command ready to copy.
 
-Abrir direto em um repositório:
+Open directly on a repository:
 
 ```bash
-ngit web npub1.../meu-projeto
+ngit web npub1.../my-project
 ```
 
-Opções:
+Options:
 
 ```bash
 ngit web --port 4000 --host 127.0.0.1 --no-open
 ```
 
-## Comandos
+## Commands
 
-| Comando | Descrição |
+| Command | Description |
 | --- | --- |
-| `ngit init [projeto]` | Inicializa o Git e o metadata `.ngit/` |
-| `ngit login [--generate]` | Salva ou cria sua identidade Nostr |
-| `ngit whoami` | Mostra a identidade logada |
-| `ngit add <arquivos...>` | Adiciona arquivos ao índice Git |
-| `ngit commit [-m "msg"]` | Cria um commit usando o Git local |
-| `ngit version [create/list/switch]` | Cria/lista versões e troca para uma versão ou hash |
-| `ngit branch [list/new/switch]` | Lista/cria/troca de branch |
-| `ngit push` | Publica commits, bundle, manifesto e arquivos |
-| `ngit clone <npub.../projeto> [pasta]` | Clona um repositório do Nostr |
-| `ngit web [npub.../projeto]` | Abre a interface web local |
-| `ngit help` | Mostra a ajuda |
+| `ngit init [project]` | Initializes Git and the `.ngit/` metadata |
+| `ngit login [--generate]` | Saves or creates your Nostr identity |
+| `ngit whoami` | Shows the logged-in identity |
+| `ngit add <files...>` | Adds files to the Git index |
+| `ngit commit [-m "msg"]` | Creates a commit using local Git |
+| `ngit version [create/list/switch]` | Creates/lists versions and switches to a version or hash |
+| `ngit branch [list/new/switch]` | List/create/switch branch |
+| `ngit push` | Publishes commits, bundle, manifest and files |
+| `ngit clone <npub.../project> [folder]` | Clones a repository from Nostr |
+| `ngit web [npub.../project]` | Opens the local web interface |
+| `ngit help` | Shows help |
 
-## Versões
+## Versions
 
-Ngit usa tags Git anotadas no padrão SemVer (`vX.Y.Z`) para versionar commits.
+Ngit uses annotated Git tags in the SemVer pattern (`vX.Y.Z`) to version commits.
 
-Criar uma versão:
+Create a version:
 
 ```bash
 ngit version create v1.0.0
-ngit version create --patch              # sobe patch automaticamente (v1.0.0 -> v1.0.1)
-ngit version create --minor -m "novo recurso"
-ngit version create v1.1.0 a1b2c3d       # versiona um commit específico pelo hash
+ngit version create --patch              # bumps the patch automatically (v1.0.0 -> v1.0.1)
+ngit version create --minor -m "new feature"
+ngit version create v1.1.0 a1b2c3d       # versions a specific commit by hash
 ```
 
-Listar as versões:
+List the versions:
 
 ```bash
 ngit version list
-→ v1.0.1       a9b886d  2026-10-20  versão v1.0.1
-  v1.0.0       80f0ec4  2026-10-20  versão v1.0.0
+→ v1.0.1       a9b886d  2026-10-20  version v1.0.1
+  v1.0.0       80f0ec4  2026-10-20  version v1.0.0
 ```
 
-Trocar para uma versão ou commit (o bundle traz o histórico completo, então funciona mesmo no clone):
+Switch to a version or commit (the bundle carries the full history, so it works even on a clone):
 
 ```bash
-ngit version switch v1.0.0        # por versão (aceita "1.0.0" sem o v)
-ngit version switch a1b2c3d       # por hash (abreviado ou completo)
-ngit version switch latest        # de volta à última versão
+ngit version switch v1.0.0        # by version (accepts "1.0.0" without the v)
+ngit version switch a1b2c3d       # by hash (short or full)
+ngit version switch latest        # back to the latest version
 ```
 
-Em HEAD destacado o push é bloqueado; para publicar esse estado, crie uma branch:
+On a detached HEAD the push is blocked; to publish that state, create a branch:
 
 ```bash
-ngit version switch v1.0.0 --branch correcao-1.0.0
+ngit version switch v1.0.0 --branch fix-1.0.0
 ```
 
-As versões são enviadas no manifesto a cada `ngit push`, então o clone em outra máquina enxerga as mesmas tags.
+Versions are sent in the manifest on every `ngit push`, so a clone on another machine sees the same tags.
 
 ## Branches
 
 ```bash
-ngit branch list                    # lista as branches locais (marcada com →)
-ngit branch new hotfix              # cria "hotfix" no commit atual e troca p/ ela
-ngit branch switch main             # troca para uma branch existente
-ngit branch checkout novidade       # troca se existir; senão cria
+ngit branch list                    # lists local branches (marked with →)
+ngit branch new hotfix              # creates "hotfix" on the current commit and switches to it
+ngit branch switch main             # switches to an existing branch
+ngit branch checkout newthing       # switches if it exists; otherwise creates it
 ```
 
-Para publicar uma branch no Nostr, basta estar nela e rodar `ngit push` — o estado governa a branch atual (`HEAD` na publicação), e o evento de estado guarda qual foi. As branches **locais** viajam sempre dentro do bundle Git completo; portanto, o `ngit clone` recebe todas elas, e `ngit branch list`/`ngit branch switch` funcionam direto no clone.
+To publish a branch on Nostr, just be on it and run `ngit push` — the state governs the current branch (`HEAD` on publish), and the state event records which one it was. **Local** branches always travel inside the full Git bundle; therefore `ngit clone` receives all of them, and `ngit branch list`/`ngit branch switch` work right on the clone.
 
-## Como funciona
+## How it works
 
-Cada repositório é identificado por:
+Each repository is identified by:
 
 ```
-autor (pubkey Nostr) + nome do projeto (tag "d")
+author (Nostr pubkey) + project name ("d" tag)
 ```
 
-No `push`, o ngit:
+On `push`, ngit:
 
-1. Executa `git bundle create --all` para empacotar o histórico completo.
-2. Lista os arquivos rastreados no commit atual.
-3. Envia cada arquivo ao Blossom, endereçado pelo SHA-256 do conteúdo.
-4. Gera um manifesto JSON com árvore de arquivos, commits e tipos MIME.
-5. Publica um evento de estado Nostr com as referências do bundle e do manifesto.
-6. Publica/atualiza o anúncio público do repositório.
+1. Runs `git bundle create --all` to package the full history.
+2. Lists the files tracked in the current commit.
+3. Sends each file to Blossom, addressed by the SHA-256 of the content.
+4. Generates a JSON manifest with the file tree, commits and MIME types.
+5. Publishes a Nostr state event with the bundle and manifest references.
+6. Publishes/updates the public repository announcement.
 
-Eventos usados:
+Events used:
 
-| Kind | Uso |
+| Kind | Use |
 | --- | --- |
-| `30617` | Anúncio do repositório (compatível com NIP-34) |
-| `30618` | Estado do repositório: branch, commit, bundle e manifesto |
+| `30617` | Repository announcement (NIP-34 compatible) |
+| `30618` | Repository state: branch, commit, bundle and manifest |
 
-Blossom é usado para armazenar:
+Blossom is used to store:
 
-- bundle Git;
-- arquivos individuais;
-- manifesto JSON.
+- the Git bundle;
+- individual files;
+- the JSON manifest.
 
-Todo conteúdo baixado é verificado pelo SHA-256. Eventos Nostr têm a assinatura verificada antes de serem usados.
+All downloaded content is verified by SHA-256. Nostr events have their signature verified before being used.
 
-## Configuração
+## Configuration
 
-Arquivo padrão:
+Default file:
 
 ```
 ~/.ngit/config.json
 ```
 
-Estrutura simplificada:
+Simplified structure:
 
 ```json
 {
@@ -280,60 +280,60 @@ Estrutura simplificada:
 }
 ```
 
-Variáveis de ambiente:
+Environment variables:
 
-| Variável | Efeito |
+| Variable | Effect |
 | --- | --- |
-| `NGIT_NSEC` | Usa uma chave do ambiente (sobrepõe a chave salva) |
-| `NGIT_RELAYS` | Relays separados por vírgula |
-| `NGIT_BLOSSOM_SERVERS` | Servidores Blossom separados por vírgula |
-| `NGIT_HOME` | Diretório alternativo para o config |
-| `NGIT_CONFIG` | Caminho alternativo para o arquivo de config |
-| `NGIT_ALLOW_LOCAL_BLOSSOM` | `1` permite Blossom local/HTTP |
-| `NGIT_DEBUG` | Mostra stack trace em erros |
+| `NGIT_NSEC` | Uses a key from the environment (overrides the saved key) |
+| `NGIT_RELAYS` | Comma-separated relays |
+| `NGIT_BLOSSOM_SERVERS` | Comma-separated Blossom servers |
+| `NGIT_HOME` | Alternative directory for the config |
+| `NGIT_CONFIG` | Alternative path for the config file |
+| `NGIT_ALLOW_LOCAL_BLOSSOM` | `1` allows local/HTTP Blossom |
+| `NGIT_DEBUG` | Shows stack traces on errors |
 
-## Segurança
+## Security
 
-- A chave privada fica em `~/.ngit/config.json` com permissão restrita (`0600` em sistemas POSIX).
-- Ela não é criptografada. Use uma identidade dedicada para testes ou um computador confiável.
-- Faça backup do `nsec`. Sem ele não é possível atualizar os repositórios.
-- Nunca publique seu `nsec`. Ele é diferente do `npub`.
-- O `clone` e a interface web são somente leitura e não precisam da chave privada.
-- A interface web roda localmente em `127.0.0.1` por padrão.
+- The private key lives in `~/.ngit/config.json` with restricted permissions (`0600` on POSIX systems).
+- It is not encrypted. Use a dedicated identity for testing or a trusted machine.
+- Back up your `nsec`. Without it you cannot update the repositories.
+- Never publish your `nsec`. It is different from the `npub`.
+- `clone` and the web interface are read-only and do not need the private key.
+- The web interface runs locally on `127.0.0.1` by default.
 
-## Limitações atuais
+## Current limitations
 
-- `push` publica o estado da branch atual; a interface web mostra a branch principal.
-- Não há `pull`, `merge`, issues ou pull requests.
-- Relays e servidores Blossom públicos podem ficar indisponíveis; configure alternativas.
-- Servidores Blossom públicos podem impor limites de tamanho por arquivo.
-- O push carrega arquivos e bundle em memória; repositórios muito grandes podem consumir bastante RAM.
-- O bundle completo é gerado a cada push e reenviado quando o histórico muda; arquivos já existentes no Blossom são reaproveitados pelo hash.
-- Repositórios privados/criptografados ainda não são suportados.
+- `push` publishes the state of the current branch; the web interface shows the main branch.
+- There is no `pull`, `merge`, issues or pull requests.
+- Public relays and Blossom servers may go unavailable; configure alternatives.
+- Public Blossom servers may enforce per-file size limits.
+- Push loads files and bundle into memory; very large repositories may use a lot of RAM.
+- The full bundle is generated on every push and re-sent when the history changes; files already on Blossom are reused by hash.
+- Private/encrypted repositories are not supported yet.
 
-## Publicar o próprio ngit no GitHub
+## Publishing your own ngit on GitHub
 
 ```bash
 git init -b main
 git add .
-git commit -m "feat: cliente ngit"
-git remote add origin https://github.com/SEU-USUARIO/nostr-git.git
+git commit -m "feat: ngit client"
+git remote add origin https://github.com/YOUR-USERNAME/nostr-git.git
 git push -u origin main
 ```
 
-Depois a instalação global pode ser feita com:
+Then the global install can be done with:
 
 ```bash
-npm install -g github:SEU-USUARIO/nostr-git
+npm install -g github:YOUR-USERNAME/nostr-git
 ```
 
-Para publicar no npm:
+To publish on npm:
 
 ```bash
 npm publish
 ```
 
-## Desenvolvimento
+## Development
 
 ```bash
 npm install
@@ -342,16 +342,16 @@ node bin/ngit.js --help
 npm link
 ```
 
-Estrutura:
+Structure:
 
 ```
-bin/            entrada da CLI
+bin/            CLI entry point
 src/commands/   init, login, add, commit, push, clone, version, web
-src/lib/        Git, Nostr, Blossom, protocolo, manifesto, semver e servidor web
-web/            interface HTML/CSS/JS
-test/           testes unitários
+src/lib/        Git, Nostr, Blossom, protocol, manifest, semver and web server
+web/            HTML/CSS/JS interface
+test/           unit tests
 ```
 
-## Licença
+## License
 
 MIT

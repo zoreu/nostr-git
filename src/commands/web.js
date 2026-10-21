@@ -15,7 +15,7 @@ export async function webCommand(args) {
   const host = optionValue(args, '--host') || '127.0.0.1';
   const port = Number(optionValue(args, '--port') || optionValue(args, '-p') || 3737);
   if (!Number.isInteger(port) || port < 1 || port > 65535) {
-    throw new Error('Porta inválida.');
+    throw new Error('Invalid port.');
   }
 
   const positional = args.filter(
@@ -39,7 +39,7 @@ export async function webCommand(args) {
       target = { npub: config.npub, project: raw };
     } else {
       throw new Error(
-        'Informe o repositório como npub1.../projeto ou faça login para usar apenas o nome do projeto.'
+        'Provide the repository as npub1.../project or log in to use just the project name.'
       );
     }
   }
@@ -54,7 +54,7 @@ export async function webCommand(args) {
     address = await app.listen({ host, port });
   } catch (error) {
     if (error.code === 'EADDRINUSE') {
-      throw new Error(`A porta ${port} já está em uso. Tente: ngit web --port ${port + 1}`);
+      throw new Error(`Port ${port} is already in use. Try: ngit web --port ${port + 1}`);
     }
     throw error;
   }
@@ -67,19 +67,19 @@ export async function webCommand(args) {
   const url = `${base}${hash}`;
 
   console.log('');
-  success(`Interface web rodando em ${ui.cyan(url)}`);
+  success(`Web interface running at ${ui.cyan(url)}`);
   info(`  ${ui.dim('relays:')}  ${config.relays.join(', ')}`);
   info(`  ${ui.dim('blossom:')} ${config.blossomServers.join(', ')}`);
-  info(`  ${ui.dim('Pressione Ctrl+C para encerrar.')}`);
+  info(`  ${ui.dim('Press Ctrl+C to stop.')}`);
 
   if (!noOpen) {
     const opened = openBrowser(url);
-    if (!opened) info(`  Abra manualmente: ${url}`);
+    if (!opened) info(`  Open it manually: ${url}`);
   }
 
   const shutdown = () => {
     console.log('');
-    info('Encerrando ngit web...');
+    info('Stopping ngit web...');
     app.server.close(() => process.exit(0));
     setTimeout(() => process.exit(0), 1500).unref();
   };

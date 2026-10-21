@@ -1,7 +1,7 @@
 {
   "name": "nostr-git",
-  "version": "0.1.0",
-  "description": "Git descentralizado sobre Nostr e Blossom: init, login, add, commit, push, clone e interface web.",
+  "version": "0.1.1",
+  "description": "Decentralized Git on Nostr and Blossom: init, login, add, commit, push, clone and web interface.",
   "type": "module",
   "bin": {
     "ngit": "bin/ngit.js"

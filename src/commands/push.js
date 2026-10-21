@@ -45,7 +45,7 @@ function printPublishReport(label, result) {
     if (relay.ok) {
       info(`  ${ui.green('✓')} ${relay.url} ${ui.dim(relay.message || '')}`);
     } else {
-      warn(`  ${relay.url} ${ui.dim(relay.message || 'sem resposta')}`);
+      warn(`  ${relay.url} ${ui.dim(relay.message || 'no response')}`);
     }
   }
 }
@@ -53,7 +53,7 @@ function printPublishReport(label, result) {
 function relayErrors(result) {
   return result.relays
     .filter((relay) => !relay.ok)
-    .map((relay) => `  - ${relay.url}: ${relay.message || 'sem resposta'}`)
+    .map((relay) => `  - ${relay.url}: ${relay.message || 'no response'}`)
     .join('\n');
 }
 
@@ -67,38 +67,38 @@ export async function pushCommand() {
 
   if (repo.owner && repo.owner !== config.npub) {
     warn(
-      `Este clone pertence a ${repo.owner}; o push será publicado sob a sua identidade ${config.npub}.`
+      `This clone belongs to ${repo.owner}; the push will be published under your identity ${config.npub}.`
     );
   }
 
   if (!(await hasCommits(root))) {
-    die('Nenhum commit para enviar. Use "ngit add ." e "ngit commit -m \\"mensagem\\"" primeiro.');
+    die('No commits to send. Use "ngit add ." and "ngit commit -m \\"message\\"" first.');
   }
   if (!branch) {
-    die('Faça checkout de uma branch antes do push (HEAD destacado não é suportado).');
+    die('Check out a branch before pushing (detached HEAD is not supported).');
   }
 
   const commit = await headCommit(root);
   const previousCommit = repo.lastCommit || null;
 
   if (await statusPorcelain(root)) {
-    warn('Existem alterações não commitadas. Apenas os commits serão enviados.');
+    warn('There are uncommitted changes. Only the commits will be sent.');
   }
 
-  info(ui.bold('Enumerando objetos...'));
+  info(ui.bold('Enumerating objects...'));
   const tempDir = await mkdtemp(path.join(os.tmpdir(), 'ngit-push-'));
   const bundlePath = path.join(tempDir, 'repository.bundle');
 
   try {
     const files = await collectSnapshot(root, commit);
-    info(`  ${files.length} arquivo(s), ${formatBytes(files.reduce((sum, file) => sum + file.size, 0))}`);
+    info(`  ${files.length} file(s), ${formatBytes(files.reduce((sum, file) => sum + file.size, 0))}`);
 
     await createBundle(root, bundlePath);
     const bundleBuffer = await readFile(bundlePath);
-    info(`  bundle Git: ${formatBytes(bundleBuffer.length)}`);
+    info(`  Git bundle: ${formatBytes(bundleBuffer.length)}`);
 
-    info(ui.bold('Enviando conteúdo para o Blossom...'));
-    const fileProgress = createProgress('  arquivos', files.length);
+    info(ui.bold('Sending content to Blossom...'));
+    const fileProgress = createProgress('  files', files.length);
     let reused = 0;
 
     for (let index = 0; index < files.length; index += 1) {
@@ -114,7 +114,7 @@ export async function pushCommand() {
       fileProgress.update(index + 1, file.path);
     }
     fileProgress.done(
-      `${files.length} arquivo(s), ${reused} reaproveitado(s) do Blossom`
+      `${files.length} file(s), ${reused} reused from Blossom`
     );
 
     const bundleUpload = await uploadBlob(bundleBuffer, {
@@ -150,7 +150,7 @@ export async function pushCommand() {
       reuse: false,
     });
     info(
-      `  ${ui.green('✓')} manifesto ${formatBytes(manifestUpload.size)} ${ui.dim(manifestUpload.server)}`
+      `  ${ui.green('✓')} manifest ${formatBytes(manifestUpload.size)} ${ui.dim(manifestUpload.server)}`
     );
 
     const blossomServers = [
@@ -201,22 +201,22 @@ export async function pushCommand() {
       })
     );
 
-    info(ui.bold('Publicando referências no Nostr...'));
+    info(ui.bold('Publishing references on Nostr...'));
     const [stateResult, announcementResult] = await Promise.all([
       publishEvent(config.relays, stateEvent),
       publishEvent(config.relays, announcementEvent),
     ]);
 
-    printPublishReport('  estado do repositório', stateResult);
-    printPublishReport('  anúncio do repositório', announcementResult);
+    printPublishReport('  repository state', stateResult);
+    printPublishReport('  repository announcement', announcementResult);
 
     if (!stateResult.ok) {
       die(
-        `Nenhum relay aceitou o estado do repositório.\n${relayErrors(stateResult)}`
+        `No relay accepted the repository state.\n${relayErrors(stateResult)}`
       );
     }
     if (!announcementResult.ok) {
-      warn('O estado foi publicado, mas o anúncio do repositório não foi aceito por nenhum relay.');
+      warn('The state was published, but no relay accepted the repository announcement.');
     }
 
     saveRepoConfig(root, {
@@ -233,7 +233,7 @@ export async function pushCommand() {
     try {
       const remoteName = await setNostrRemote(root, buildRepoUrl(config.npub, project));
       if (remoteName !== 'origin') {
-        info(`  ${ui.dim(`remote "${remoteName}" configurado (o origin existente foi mantido).`)}`);
+        info(`  ${ui.dim(`remote "${remoteName}" configured (the existing origin was kept).`)}`);
       }
     } catch {
       // Non-fatal: Git remotes are only displayed for convenience.
@@ -247,11 +247,11 @@ export async function pushCommand() {
     } else if (previousCommit !== commit) {
       info(`   ${shortHash(previousCommit)}..${shortHash(commit)}  ${branch} -> ${branch}`);
     } else {
-      info(`   ${branch} -> ${branch} ${ui.dim('(sem novos commits)')}`);
+      info(`   ${branch} -> ${branch} ${ui.dim('(no new commits)')}`);
     }
     info('');
-    success('Push concluído. Arquivos e histórico estão no Nostr + Blossom.');
-    info(`  ${ui.dim('Visualize com:')} ngit web ${config.npub}/${project}`);
+    success('Push complete. Files and history are on Nostr + Blossom.');
+    info(`  ${ui.dim('View with:')} ngit web ${config.npub}/${project}`);
   } finally {
     await rm(tempDir, { recursive: true, force: true }).catch(() => {});
   }

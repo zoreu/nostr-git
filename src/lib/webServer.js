@@ -57,7 +57,7 @@ function decodeSegment(value) {
   try {
     return decodeURIComponent(value);
   } catch {
-    throw new HttpError(400, 'Parâmetro inválido na URL.');
+    throw new HttpError(400, 'Invalid URL parameter.');
   }
 }
 
@@ -98,7 +98,7 @@ export function createWebApp({ relays, blossomServers }) {
   }
 
   async function loadManifest(state) {
-    if (!state.manifest) throw new HttpError(404, 'Este repositório não possui manifesto web.');
+    if (!state.manifest) throw new HttpError(404, 'This repository has no web manifest.');
     const cached = manifestCache.get(state.manifest.hash);
     if (cached && cached.expires > Date.now()) return cached.value;
 
@@ -109,13 +109,13 @@ export function createWebApp({ relays, blossomServers }) {
     ]);
     const downloaded = await cachedBlob(state.manifest.hash, servers, state.manifest.size);
     if (downloaded.buffer.length > MANIFEST_LIMIT) {
-      throw new HttpError(502, 'Manifesto do repositório é grande demais.');
+      throw new HttpError(502, 'Repository manifest is too large.');
     }
     let manifest;
     try {
       manifest = validateManifest(JSON.parse(downloaded.buffer.toString('utf8')));
     } catch (error) {
-      throw new HttpError(502, `Manifesto inválido: ${error.message}`);
+      throw new HttpError(502, `Invalid manifest: ${error.message}`);
     }
     manifestCache.set(state.manifest.hash, {
       value: manifest,
@@ -147,7 +147,7 @@ export function createWebApp({ relays, blossomServers }) {
     }
 
     if (!repository.state) {
-      throw new HttpError(404, `Repositório ${project} não encontrado para esta identidade.`);
+      throw new HttpError(404, `Repository ${project} not found for this identity.`);
     }
 
     const manifest = await loadManifest(repository.state);
@@ -170,7 +170,7 @@ export function createWebApp({ relays, blossomServers }) {
 
   async function readFileEntry(data, filePath) {
     const entry = data.manifest.tree.find((file) => file.path === filePath);
-    if (!entry) throw new HttpError(404, `Arquivo não encontrado: ${filePath}`);
+    if (!entry) throw new HttpError(404, `File not found: ${filePath}`);
     const servers = unique([...(entry.servers || []), ...data.fileServers]);
     const downloaded = await cachedBlob(entry.sha256, servers, entry.size);
     return { entry, buffer: downloaded.buffer };
@@ -289,13 +289,13 @@ export function createWebApp({ relays, blossomServers }) {
 
     try {
       if (request.method !== 'GET' && request.method !== 'HEAD') {
-        throw new HttpError(405, 'Método não permitido.');
+        throw new HttpError(405, 'Method not allowed.');
       }
 
       const pathname = requestUrl.pathname;
       if (!pathname.startsWith('/api/')) {
         const staticEntry = STATIC_FILES[pathname];
-        if (!staticEntry) throw new HttpError(404, 'Página não encontrada.');
+        if (!staticEntry) throw new HttpError(404, 'Page not found.');
         const [file, type] = staticEntry;
         const body = await readFile(path.join(WEB_DIR, file));
         const headers = {
@@ -334,7 +334,7 @@ export function createWebApp({ relays, blossomServers }) {
       if (endpoint === 'repos') {
         const identity = requestUrl.searchParams.get('author');
         const limit = Math.min(Number(requestUrl.searchParams.get('limit')) || 24, 60);
-        if (!identity) throw new HttpError(400, 'Parâmetro author é obrigatório.');
+        if (!identity) throw new HttpError(400, 'The author parameter is required.');
         let pubkeyHex;
         try {
           pubkeyHex = normalizePubkey(identity);
@@ -367,7 +367,7 @@ export function createWebApp({ relays, blossomServers }) {
       }
 
       if (endpoint === 'repo') {
-        if (parts.length < 4) throw new HttpError(400, 'Informe identidade e projeto.');
+        if (parts.length < 4) throw new HttpError(400, 'Provide identity and project.');
         const identity = decodeSegment(parts[2]);
         const project = decodeSegment(parts[3]);
         const result = await handleRepo(identity, project);
@@ -376,28 +376,28 @@ export function createWebApp({ relays, blossomServers }) {
       }
 
       if (endpoint === 'file') {
-        if (parts.length < 4) throw new HttpError(400, 'Informe identidade e projeto.');
+        if (parts.length < 4) throw new HttpError(400, 'Provide identity and project.');
         const identity = decodeSegment(parts[2]);
         const project = decodeSegment(parts[3]);
         const filePath = requestUrl.searchParams.get('path');
-        if (!filePath) throw new HttpError(400, 'Parâmetro path é obrigatório.');
+        if (!filePath) throw new HttpError(400, 'The path parameter is required.');
         const result = await handleFile(identity, project, filePath);
         sendJson(response, 200, result);
         return;
       }
 
       if (endpoint === 'raw') {
-        if (parts.length < 4) throw new HttpError(400, 'Informe identidade e projeto.');
+        if (parts.length < 4) throw new HttpError(400, 'Provide identity and project.');
         const identity = decodeSegment(parts[2]);
         const project = decodeSegment(parts[3]);
         const filePath = requestUrl.searchParams.get('path');
-        if (!filePath) throw new HttpError(400, 'Parâmetro path é obrigatório.');
+        if (!filePath) throw new HttpError(400, 'The path parameter is required.');
         const download = requestUrl.searchParams.get('download') === '1';
         await handleRaw(identity, project, filePath, response, download);
         return;
       }
 
-      throw new HttpError(404, 'Endpoint não encontrado.');
+      throw new HttpError(404, 'Endpoint not found.');
     } catch (error) {
       const status = error instanceof HttpError ? error.status : 502;
       if (!(error instanceof HttpError)) {

@@ -12,7 +12,7 @@ export const RELAY_TIMEOUT_MS = 7000;
 
 export function normalizeRelayUrl(value) {
   const raw = String(value || '').trim();
-  if (!raw) throw new Error('Relay vazio.');
+  if (!raw) throw new Error('Empty relay.');
   if (raw.startsWith('ws://') || raw.startsWith('wss://')) return raw.replace(/\/+$/, '');
   if (raw.startsWith('http://')) return `ws://${raw.slice('http://'.length)}`.replace(/\/+$/, '');
   if (raw.startsWith('https://')) return `wss://${raw.slice('https://'.length)}`.replace(/\/+$/, '');
@@ -25,14 +25,14 @@ export function normalizeRelayList(relays) {
 
 export function normalizePubkey(value) {
   const raw = String(value || '').trim();
-  if (!raw) throw new Error('Pubkey vazia.');
+  if (!raw) throw new Error('Empty pubkey.');
   if (raw.startsWith('npub1')) {
     const decoded = nip19.decode(raw);
-    if (decoded.type !== 'npub') throw new Error('A chave informada não é um npub válido.');
+    if (decoded.type !== 'npub') throw new Error('The provided key is not a valid npub.');
     return decoded.data;
   }
   if (/^[0-9a-fA-F]{64}$/.test(raw)) return raw.toLowerCase();
-  throw new Error('Informe uma identidade npub1... ou uma pubkey hexadecimal de 64 caracteres.');
+  throw new Error('Provide an npub1... identity or a 64-character hexadecimal pubkey.');
 }
 
 export function pubkeyToNpub(pubkeyHex) {
@@ -42,7 +42,7 @@ export function pubkeyToNpub(pubkeyHex) {
 export function secretToIdentity(secretKey) {
   const bytes =
     secretKey instanceof Uint8Array ? secretKey : Uint8Array.from(Buffer.from(secretKey, 'hex'));
-  if (bytes.length !== 32) throw new Error('Chave privada inválida.');
+  if (bytes.length !== 32) throw new Error('Invalid private key.');
   const pubkeyHex = getPublicKey(bytes);
   return {
     secretKeyHex: Buffer.from(bytes).toString('hex'),
@@ -54,16 +54,16 @@ export function secretToIdentity(secretKey) {
 
 export function decodeSecretKey(value) {
   const raw = String(value || '').trim();
-  if (!raw) throw new Error('Chave privada vazia.');
+  if (!raw) throw new Error('Empty private key.');
   if (raw.startsWith('nsec1')) {
     const decoded = nip19.decode(raw);
-    if (decoded.type !== 'nsec') throw new Error('A chave informada não é um nsec válido.');
+    if (decoded.type !== 'nsec') throw new Error('The provided key is not a valid nsec.');
     return secretToIdentity(decoded.data);
   }
   if (/^[0-9a-fA-F]{64}$/.test(raw)) {
     return secretToIdentity(Uint8Array.from(Buffer.from(raw, 'hex')));
   }
-  throw new Error('Chave privada inválida. Use um nsec1... ou 64 caracteres hexadecimais.');
+  throw new Error('Invalid private key. Use an nsec1... or 64 hexadecimal characters.');
 }
 
 export function generateIdentity() {
@@ -107,7 +107,7 @@ function queryOneRelay(relayUrl, filter, timeoutMs) {
       }
     };
 
-    const timer = setTimeout(() => finish(new Error('Tempo esgotado')), timeoutMs);
+    const timer = setTimeout(() => finish(new Error('Timed out')), timeoutMs);
     timer.unref?.();
 
     try {
@@ -210,7 +210,7 @@ function publishOneRelay(relayUrl, event, timeoutMs) {
       resolve({ ok, message: message || notice || null });
     };
 
-    const timer = setTimeout(() => finish(false, 'Tempo esgotado'), timeoutMs);
+    const timer = setTimeout(() => finish(false, 'Timed out'), timeoutMs);
     timer.unref?.();
 
     try {
@@ -238,17 +238,17 @@ function publishOneRelay(relayUrl, event, timeoutMs) {
       if (!Array.isArray(message)) return;
       const [type, id, ok, extra] = message;
       if (type === 'OK' && id === event.id) {
-        finish(Boolean(ok), extra ? String(extra) : ok ? 'aceito' : 'rejeitado');
+        finish(Boolean(ok), extra ? String(extra) : ok ? 'accepted' : 'rejected');
         return;
       }
       if (type === 'NOTICE') notice = String(extra || id || 'notice');
-      if (type === 'AUTH') notice = 'relay exige autenticação NIP-42';
+      if (type === 'AUTH') notice = 'relay requires NIP-42 authentication';
     });
 
     socket.on('error', (error) => finish(false, error.message));
     socket.on('close', () => {
-      if (opened) finish(false, 'conexão encerrada sem OK');
-      else finish(false, 'não foi possível conectar');
+      if (opened) finish(false, 'connection closed without OK');
+      else finish(false, 'could not connect');
     });
   });
 }

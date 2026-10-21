@@ -11,7 +11,7 @@ function restoreEnv(name, previous) {
   else process.env[name] = previous;
 }
 
-test('NGIT_NSEC fornece a identidade sem depender do config', async () => {
+test('NGIT_NSEC provides the identity without depending on the config file', async () => {
   const home = await mkdtemp(path.join(os.tmpdir(), 'ngit-config-test-'));
   const identity = generateIdentity();
   const previousHome = process.env.NGIT_HOME;
@@ -31,11 +31,11 @@ test('NGIT_NSEC fornece a identidade sem depender do config', async () => {
   }
 });
 
-test('NGIT_NSEC inválido gera erro claro', () => {
+test('invalid NGIT_NSEC produces a clear error', () => {
   const previousNsec = process.env.NGIT_NSEC;
   process.env.NGIT_NSEC = 'nsec-invalido';
   try {
-    assert.throws(() => loadGlobalConfig(), /NGIT_NSEC inválido/i);
+    assert.throws(() => loadGlobalConfig(), /Invalid NGIT_NSEC/i);
   } finally {
     restoreEnv('NGIT_NSEC', previousNsec);
   }

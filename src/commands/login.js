@@ -17,7 +17,7 @@ function parseListOption(args, name) {
   const index = args.indexOf(name);
   if (index === -1) return null;
   const value = args[index + 1];
-  if (!value) throw new Error(`Informe um valor depois de ${name}.`);
+  if (!value) throw new Error(`Provide a value after ${name}.`);
   return value
     .split(',')
     .map((item) => item.trim())
@@ -40,12 +40,12 @@ export async function loginCommand(args) {
   } else {
     let secret = process.env.NGIT_NSEC || keyArgument;
     if (!secret) {
-      info('Sua chave privada fica salva apenas neste computador (~/.ngit/config.json).');
-      info('Dica: use --generate para criar uma identidade nova.');
+      info('Your private key is saved only on this computer (~/.ngit/config.json).');
+      info('Tip: use --generate to create a new identity.');
       info('');
-      secret = await promptSecret('Chave privada Nostr (nsec1...): ');
+      secret = await promptSecret('Nostr private key (nsec1...): ');
     }
-    if (!secret) die('Nenhuma chave privada informada.');
+    if (!secret) die('No private key provided.');
     identity = decodeSecretKey(secret);
   }
 
@@ -53,9 +53,9 @@ export async function loginCommand(args) {
   const relays = relaysOption || current.relays || DEFAULT_RELAYS;
   const blossomServers = blossomOption || current.blossomServers || DEFAULT_BLOSSOM_SERVERS;
 
-  if (!relays || relays.length === 0) die('É necessário pelo menos um relay Nostr.');
+  if (!relays || relays.length === 0) die('At least one Nostr relay is required.');
   if (!blossomServers || blossomServers.length === 0) {
-    die('É necessário pelo menos um servidor Blossom.');
+    die('At least one Blossom server is required.');
   }
 
   saveGlobalConfig({
@@ -67,28 +67,28 @@ export async function loginCommand(args) {
   });
 
   console.log('');
-  success(`Login realizado como ${ui.bold(identity.npub)}`);
+  success(`Logged in as ${ui.bold(identity.npub)}`);
   info(`  ${ui.dim('pubkey:')} ${identity.pubkeyHex}`);
   info(`  ${ui.dim('config:')} ${configFile()}`);
   info('');
-  info(`${ui.dim('Relays Nostr:')}\n${formatRelayList(relays)}`);
-  info(`${ui.dim('Servidores Blossom:')}\n${formatRelayList(blossomServers)}`);
+  info(`${ui.dim('Nostr relays:')}\n${formatRelayList(relays)}`);
+  info(`${ui.dim('Blossom servers:')}\n${formatRelayList(blossomServers)}`);
   info('');
 
   if (generate) {
-    warn('Guarde sua chave privada em local seguro. Ela não será exibida novamente:');
+    warn('Store your private key in a safe place. It will not be shown again:');
     info(`  ${ui.bold(identity.nsec || '')}`);
     info('');
-    info('Para exibir o nsec depois, use seu gerenciador de chaves ou um cliente Nostr.');
+    info('To show the nsec later, use your key manager or a Nostr client.');
   } else {
-    info(ui.dim('Sua chave privada foi salva com permissões restritas.'));
+    info(ui.dim('Your private key was saved with restricted permissions.'));
   }
 }
 
 export function whoamiCommand() {
   const config = loadGlobalConfig();
   if (!config.pubkeyHex) {
-    die('Nenhuma identidade configurada. Rode "ngit login".');
+    die('No identity configured. Run "ngit login".');
   }
   info(`npub:   ${pubkeyToNpub(normalizePubkey(config.pubkeyHex))}`);
   info(`pubkey: ${config.pubkeyHex}`);

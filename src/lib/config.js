@@ -70,7 +70,7 @@ export function loadGlobalConfig() {
   try {
     stored = readJsonFile(configFile()) || {};
   } catch (error) {
-    throw new Error(`Não foi possível ler ${configFile()}: ${error.message}`);
+    throw new Error(`Could not read ${configFile()}: ${error.message}`);
   }
 
   let envIdentity = null;
@@ -78,7 +78,7 @@ export function loadGlobalConfig() {
     try {
       envIdentity = decodeSecretKey(process.env.NGIT_NSEC);
     } catch (error) {
-      throw new Error(`NGIT_NSEC inválido: ${error.message}`);
+      throw new Error(`Invalid NGIT_NSEC: ${error.message}`);
     }
   }
 
@@ -115,7 +115,7 @@ export function requireLogin() {
   const config = loadGlobalConfig();
   if (!config.secretKeyHex || !config.pubkeyHex) {
     const error = new Error(
-      'Você ainda não fez login. Rode "ngit login" para configurar sua identidade Nostr.'
+      'You are not logged in yet. Run "ngit login" to configure your Nostr identity.'
     );
     error.ngitHandled = true;
     throw error;
@@ -171,13 +171,13 @@ export function sanitizeProjectName(value) {
     .replace(/[^a-zA-Z0-9._-]/g, '-')
     .replace(/-+/g, '-')
     .replace(/^[-.]+|[-.]+$/g, '');
-  return cleaned || 'repositorio';
+  return cleaned || 'repository';
 }
 
 export function validateProjectName(value) {
   if (!value || !/^[a-zA-Z0-9._-]{1,80}$/.test(value)) {
     throw new Error(
-      'Nome de projeto inválido. Use letras, números, ponto, hífen ou underline (até 80 caracteres).'
+      'Invalid project name. Use letters, numbers, dot, hyphen or underscore (up to 80 characters).'
     );
   }
   return value;

@@ -6,57 +6,57 @@ const packageJson = JSON.parse(
 );
 
 const HELP = `
-${ui.bold('Uso:')} ngit <comando> [opções]
+${ui.bold('Usage:')} ngit <command> [options]
 
-${ui.bold('Comandos:')}
-  ${ui.cyan('init')} [projeto]                    Inicializa o Git e os metadados ngit
-  ${ui.cyan('login')} [--generate]                Salva sua identidade Nostr (nsec)
-  ${ui.cyan('add')} <arquivos...>                  Adiciona arquivos ao índice Git
-  ${ui.cyan('commit')} [-m "mensagem"]             Cria um commit
-  ${ui.cyan('push')}                               Publica commits, bundle e arquivos no Nostr/Blossom
-  ${ui.cyan('clone')} <npub.../projeto> [pasta]    Clona um repositório a partir do Nostr
-  ${ui.cyan('version')} <sub>                      Cria/lista versões e troca para uma versão ou hash
-  ${ui.cyan('branch')} <sub>                       Lista/cria/troca de branch
-  ${ui.cyan('web')} [npub.../projeto]              Abre a interface web para navegar nos repositórios
-  ${ui.cyan('whoami')}                             Mostra a identidade logada
-  ${ui.cyan('help')}                               Mostra esta ajuda
+${ui.bold('Commands:')}
+  ${ui.cyan('init')} [project]                     Initializes Git and the ngit metadata
+  ${ui.cyan('login')} [--generate]                 Saves your Nostr identity (nsec)
+  ${ui.cyan('add')} <files...>                     Adds files to the Git index
+  ${ui.cyan('commit')} [-m "message"]              Creates a commit
+  ${ui.cyan('push')}                               Publishes commits, bundle and files to Nostr/Blossom
+  ${ui.cyan('clone')} <npub.../project> [folder]   Clones a repository from Nostr
+  ${ui.cyan('version')} <sub>                      Creates/lists versions and switches to a version or hash
+  ${ui.cyan('branch')} <sub>                       List/create/switch branch
+  ${ui.cyan('web')} [npub.../project]              Opens the web interface to browse repositories
+  ${ui.cyan('whoami')}                             Shows the logged-in identity
+  ${ui.cyan('help')}                               Shows this help
 
-${ui.bold('Opções de login:')}
-  --generate                 Cria uma identidade nova e mostra o nsec uma única vez
-  --relays a,b               Define relays Nostr
-  --blossom a,b              Define servidores Blossom
+${ui.bold('Login options:')}
+  --generate                 Creates a new identity and shows the nsec once
+  --relays a,b               Sets Nostr relays
+  --blossom a,b              Sets Blossom servers
 
-${ui.bold('Opções de web:')}
-  --port 3737                Porta local (padrão: 3737)
-  --host 127.0.0.1           Endereço de escuta
-  --no-open                  Não abre o navegador automaticamente
+${ui.bold('Web options:')}
+  --port 3737                Local port (default: 3737)
+  --host 127.0.0.1           Listen address
+  --no-open                  Does not open the browser automatically
 
-${ui.bold('Opções de version:')}
-  ngit version list                            Lista as versões (tags vSemVer)
-  ngit version create [vX.Y.Z] [--patch]       Cria uma versão (tag anotada)
-  ngit version switch <versão|hash|latest>     Troca o repo para uma versão/commit
-  Veja todos os detalhes com: ngit version help
+${ui.bold('Version options:')}
+  ngit version list                            Lists the versions (vSemVer tags)
+  ngit version create [vX.Y.Z] [--patch]       Creates a version (annotated tag)
+  ngit version switch <version|hash|latest>    Switches the repo to a version/commit
+  See all details with: ngit version help
 
-${ui.bold('Exemplos:')}
+${ui.bold('Examples:')}
   ngit init
   ngit login --generate
   ngit add .
-  ngit commit -m "primeiro commit"
+  ngit commit -m "first commit"
   ngit version create v1.0.0
   ngit push
-  ngit clone npub1abc.../meu-projeto
+  ngit clone npub1abc.../my-project
   ngit version switch v1.0.0
   ngit version switch a1b2c3d
   ngit branch list
   ngit branch new hotfix
   ngit branch switch main
-  ngit web npub1abc.../meu-projeto
+  ngit web npub1abc.../my-project
 
-${ui.bold('Variáveis de ambiente:')}
-  NGIT_NSEC                  Chave privada para login sem prompt
-  NGIT_RELAYS                Lista de relays separada por vírgula
-  NGIT_BLOSSOM_SERVERS       Lista de servidores Blossom separada por vírgula
-  NGIT_CONFIG                Caminho alternativo para o config.json
+${ui.bold('Environment variables:')}
+  NGIT_NSEC                  Private key for login without prompt
+  NGIT_RELAYS                Comma-separated list of relays
+  NGIT_BLOSSOM_SERVERS       Comma-separated list of Blossom servers
+  NGIT_CONFIG                Alternative path for config.json
 `;
 
 function wantsHelp(args) {
@@ -130,7 +130,7 @@ export async function main(argv) {
     }
     default: {
       printBanner();
-      console.error(`\nComando desconhecido: ${command}\n`);
+      console.error(`\nUnknown command: ${command}\n`);
       info(HELP);
       process.exitCode = 1;
     }

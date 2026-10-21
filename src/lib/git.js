@@ -40,7 +40,7 @@ export async function runGit(args, options = {}) {
 export async function runGitText(args, options = {}) {
   const result = await runGit(args, options);
   if (result.code !== 0) {
-    const message = result.stderr.toString('utf8').trim() || `git ${args.join(' ')} falhou`;
+    const message = result.stderr.toString('utf8').trim() || `git ${args.join(' ')} failed`;
     throw new Error(message);
   }
   return result.stdout.toString('utf8').trim();
@@ -49,7 +49,7 @@ export async function runGitText(args, options = {}) {
 export async function runGitBuffer(args, options = {}) {
   const result = await runGit(args, options);
   if (result.code !== 0) {
-    const message = result.stderr.toString('utf8').trim() || `git ${args.join(' ')} falhou`;
+    const message = result.stderr.toString('utf8').trim() || `git ${args.join(' ')} failed`;
     throw new Error(message);
   }
   return result.stdout;
@@ -72,7 +72,7 @@ export async function ensureGitInstalled() {
     await runGit(['--version']);
   } catch {
     throw new Error(
-      'Git não encontrado. Instale o Git (https://git-scm.com) e tente novamente.'
+      'Git not found. Install Git (https://git-scm.com) and try again.'
     );
   }
 }
@@ -90,7 +90,7 @@ export async function requireRepoRoot(cwd = process.cwd()) {
   const root = await findRepoRoot(cwd);
   if (!root) {
     const error = new Error(
-      'Este diretório não é um repositório ngit. Rode "ngit init" primeiro.'
+      'This directory is not an ngit repository. Run "ngit init" first.'
     );
     error.ngitHandled = true;
     throw error;
@@ -110,7 +110,7 @@ export async function headCommit(root) {
 export async function currentBranch(root) {
   const result = await runGit(['symbolic-ref', '--quiet', '--short', 'HEAD'], { cwd: root });
   if (result.code !== 0) {
-    throw new Error('HEAD destacado (detached). Faça checkout de uma branch antes de enviar.');
+    throw new Error('HEAD is detached. Check out a branch before pushing.');
   }
   return result.stdout.toString('utf8').trim();
 }
@@ -218,7 +218,7 @@ export async function checkoutRef(root, ref, { newBranch = null, force = false }
 export async function createBundle(root, file) {
   const result = await runGit(['bundle', 'create', file, '--all'], { cwd: root });
   if (result.code !== 0) {
-    throw new Error(result.stderr.toString('utf8').trim() || 'Falha ao criar o bundle Git.');
+    throw new Error(result.stderr.toString('utf8').trim() || 'Failed to create the Git bundle.');
   }
 }
 

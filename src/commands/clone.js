@@ -36,7 +36,7 @@ export async function cloneCommand(args) {
 
   const positional = args.filter((arg) => !arg.startsWith('-'));
   if (positional.length === 0) {
-    die('Informe o repositório. Exemplo: ngit clone npub1.../meu-projeto');
+    die('Provide the repository. Example: ngit clone npub1.../my-project');
   }
 
   const { identity, project: rawProject } = parseNostrUrl(positional[0]);
@@ -48,10 +48,10 @@ export async function cloneCommand(args) {
   const url = `nostr://${npub}/${project}`;
 
   if (!targetIsUsable(target)) {
-    die(`O destino "${target}" já existe e não está vazio.`);
+    die(`The destination "${target}" already exists and is not empty.`);
   }
 
-  info(`Buscando ${ui.cyan(url)} nos relays Nostr...`);
+  info(`Looking for ${ui.cyan(url)} on the Nostr relays...`);
   const repository = await fetchRepository(config.relays, pubkeyHex, project, {
     timeoutMs: 9000,
   });
@@ -59,28 +59,28 @@ export async function cloneCommand(args) {
   if (!repository.state) {
     const errors = repository.stateRelays
       .filter((relay) => !relay.ok || relay.events === 0)
-      .map((relay) => `  - ${relay.url}: ${relay.error || 'nenhum evento encontrado'}`)
+      .map((relay) => `  - ${relay.url}: ${relay.error || 'no event found'}`)
       .join('\n');
     die(
-      `Repositório não encontrado no Nostr.\n` +
-        `  identidade: ${npub}\n  projeto: ${project}\n${errors}`
+      `Repository not found on Nostr.\n` +
+        `  identity: ${npub}\n  project: ${project}\n${errors}`
     );
   }
 
   const state = repository.state;
   if (!state.bundle || !state.commit) {
     die(
-      'O evento de estado foi encontrado, mas não contém um bundle Git. ' +
-        'Faça um novo push com uma versão recente do ngit.'
+      'The state event was found, but it does not contain a Git bundle. ' +
+        'Push again with a recent version of ngit.'
     );
   }
 
   const foundRelays = repository.stateRelays.filter((relay) => relay.ok).length;
   info(
-    `  ${ui.green('✓')} repositório encontrado ${ui.dim(`(${foundRelays} relay(s), commit ${state.commit.slice(0, 7)})`)}`
+    `  ${ui.green('✓')} repository found ${ui.dim(`(${foundRelays} relay(s), commit ${state.commit.slice(0, 7)})`)}`
   );
 
-  info('Baixando bundle do Blossom...');
+  info('Downloading bundle from Blossom...');
   const servers = [
     ...state.blossomServers,
     state.bundle.server,
@@ -93,7 +93,7 @@ export async function cloneCommand(args) {
     timeoutMs: 180000,
   });
   info(
-    `  ${ui.green('✓')} ${formatBytes(downloaded.buffer.length)} ${ui.dim(`de ${downloaded.server}`)}`
+    `  ${ui.green('✓')} ${formatBytes(downloaded.buffer.length)} ${ui.dim(`from ${downloaded.server}`)}`
   );
 
   const tempDir = await mkdtemp(path.join(os.tmpdir(), 'ngit-clone-'));
@@ -103,7 +103,7 @@ export async function cloneCommand(args) {
     await writeFile(bundlePath, downloaded.buffer);
     const code = await cloneBundle(bundlePath, target, process.cwd());
     if (code !== 0) {
-      throw new Error('O Git não conseguiu montar o repositório a partir do bundle.');
+      throw new Error('Git could not rebuild the repository from the bundle.');
     }
 
     const root = path.resolve(process.cwd(), target);
@@ -132,11 +132,11 @@ export async function cloneCommand(args) {
     try {
       await setNostrRemote(root, url, { replaceOrigin: true });
     } catch {
-      warn('Não foi possível configurar o remote "origin" no Git.');
+      warn('Could not configure the Git remote "origin".');
     }
 
     console.log('');
-    success(`Clone concluído em ${ui.bold(root)}`);
+    success(`Clone complete at ${ui.bold(root)}`);
     info(`  ${ui.dim('remote:')} ${url}`);
     info(`  ${ui.dim('web:')}    ngit web ${npub}/${project}`);
   } finally {

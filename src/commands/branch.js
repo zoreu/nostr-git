@@ -9,19 +9,19 @@ import {
 import { die, info, shortHash, success, ui, warn } from '../lib/ui.js';
 
 const BRANCH_HELP = `
-${ui.bold('Uso:')} ngit branch <subcomando> [opções]
+${ui.bold('Usage:')} ngit branch <subcommand> [options]
 
-${ui.bold('Subcomandos:')}
-  ${ui.cyan('list')}                 Lista as branches locais (padrão quando sem subcomando)
-  ${ui.cyan('new')} <nome>           Cria uma branch nova a partir do commit atual e troca para ela
-  ${ui.cyan('switch')} <nome>        Troca para uma branch existente
-  ${ui.cyan('checkout')} <nome>      Troca se a branch existir; senão cria e troca
+${ui.bold('Subcommands:')}
+  ${ui.cyan('list')}                 Lists local branches (default when no subcommand)
+  ${ui.cyan('new')} <name>           Creates a new branch from the current commit and switches to it
+  ${ui.cyan('switch')} <name>        Switches to an existing branch
+  ${ui.cyan('checkout')} <name>      Switches if the branch exists; otherwise creates and switches
 
-${ui.bold('Exemplos:')}
+${ui.bold('Examples:')}
   ngit branch list
   ngit branch new hotfix
   ngit branch switch main
-  ngit branch checkout experimento
+  ngit branch checkout experiment
 `;
 
 async function located(root) {
@@ -53,14 +53,14 @@ export async function branchCommand(args) {
       console.log('');
       info(ui.bold('Branches:') + ` ${ui.dim(`${branches.length} branch(es) · @ ${shortHash(head)}`)}`);
       if (branches.length === 0) {
-        info(`${ui.dim('(nenhuma branch ainda — faça um commit ou use')} ${ui.cyan('ngit branch new main')}${ui.dim(')')}`);
+        info(`${ui.dim('(no branch yet — make a commit or use')} ${ui.cyan('ngit branch new main')}${ui.dim(')')}`);
       }
       for (const branch of branches) {
         const marker = !detached && branch === current ? ui.green('→') : ' ';
         info(`${marker} ${branch === current && !detached ? ui.cyan(branch) : branch}`);
       }
       if (detached) {
-        warn(`HEAD destacado em ${shortHash(head)}. Volte com: ngit branch switch <nome>`);
+        warn(`HEAD is detached at ${shortHash(head)}. Go back with: ngit branch switch <name>`);
       }
       break;
     }
@@ -68,10 +68,10 @@ export async function branchCommand(args) {
     case 'new': {
       const name = rest.find((arg) => !arg.startsWith('-'));
       if (!name) {
-        die('Informe o nome da branch. Exemplo: ngit branch new hotfix');
+        die('Provide the branch name. Example: ngit branch new hotfix');
       }
       if (branches.includes(name)) {
-        die(`A branch "${name}" já existe. Para trocar: ${ui.cyan(`ngit branch switch ${name}`)}`);
+        die(`The branch "${name}" already exists. To switch: ${ui.cyan(`ngit branch switch ${name}`)}`);
       }
       const code = await checkoutRef(root, head, { newBranch: name });
       if (code !== 0) {
@@ -79,24 +79,24 @@ export async function branchCommand(args) {
         return;
       }
       console.log('');
-      success(`Branch ${ui.bold(name)} criada em ${shortHash(head)} (você já está nela)`);
-      info(`  ${ui.dim('próximos passos:')} ${ui.cyan('ngit add .')}, ${ui.cyan('ngit commit -m "msg"')} e ${ui.cyan('ngit push')}`);
+      success(`Branch ${ui.bold(name)} created at ${shortHash(head)} (you are already on it)`);
+      info(`  ${ui.dim('next steps:')} ${ui.cyan('ngit add .')}, ${ui.cyan('ngit commit -m "msg"')} and ${ui.cyan('ngit push')}`);
       break;
     }
 
     case 'switch': {
       const name = rest.find((arg) => !arg.startsWith('-'));
       if (!name) {
-        die('Informe a branch. Exemplo: ngit branch switch main');
+        die('Provide the branch. Example: ngit branch switch main');
       }
       if (!branches.includes(name)) {
         die(
-          `A branch "${name}" não existe.${branches.length ? ` Existentes: ${branches.join(', ')}.` : ''}\n` +
-            `Para criar a partir do commit atual: ${ui.cyan(`ngit branch new ${name}`)}`
+          `The branch "${name}" does not exist.${branches.length ? ` Existing: ${branches.join(', ')}.` : ''}\n` +
+            `To create it from the current commit: ${ui.cyan(`ngit branch new ${name}`)}`
         );
       }
       if (!detached && name === current) {
-        info(`Já está em ${ui.cyan(name)}. Nada a fazer.`);
+        info(`Already on ${ui.cyan(name)}. Nothing to do.`);
         return;
       }
       const code = await checkoutRef(root, name);
@@ -105,14 +105,14 @@ export async function branchCommand(args) {
         return;
       }
       console.log('');
-      success(`Trocou para a branch ${ui.bold(name)}`);
+      success(`Switched to branch ${ui.bold(name)}`);
       break;
     }
 
     case 'checkout': {
       const name = rest.find((arg) => !arg.startsWith('-'));
       if (!name) {
-        die('Informe a branch. Exemplo: ngit branch checkout main');
+        die('Provide the branch. Example: ngit branch checkout main');
       }
       if (branches.includes(name)) {
         const code = await checkoutRef(root, name);
@@ -121,7 +121,7 @@ export async function branchCommand(args) {
           return;
         }
         console.log('');
-        success(`Trocou para a branch ${ui.bold(name)}`);
+        success(`Switched to branch ${ui.bold(name)}`);
       } else {
         const code = await checkoutRef(root, head, { newBranch: name });
         if (code !== 0) {
@@ -129,12 +129,12 @@ export async function branchCommand(args) {
           return;
         }
         console.log('');
-        success(`Branch ${ui.bold(name)} criada em ${shortHash(head)} (você já está nela)`);
+        success(`Branch ${ui.bold(name)} created at ${shortHash(head)} (you are already on it)`);
       }
       break;
     }
 
     default:
-      die(`Subcomando de branch desconhecido: "${sub}". Use: list, new, switch, checkout ou help.`);
+      die(`Unknown branch subcommand: "${sub}". Use: list, new, switch, checkout or help.`);
   }
 }

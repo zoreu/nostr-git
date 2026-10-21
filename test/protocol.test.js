@@ -11,27 +11,27 @@ import { mimeForPath } from '../src/lib/manifest.js';
 import { normalizeRelayUrl, normalizePubkey } from '../src/lib/nostr.js';
 import { sanitizeProjectName, validateProjectName } from '../src/lib/config.js';
 
-test('parseNostrUrl aceita nostr://, ngit:// e caminho simples', () => {
+test('parseNostrUrl accepts nostr://, ngit:// and plain paths', () => {
   const npub = 'npub1vnd9csl58a9rvngvndf0pmuww0cesrqu4wefkh80tx5ca6n4dfzshpfwv6';
-  assert.deepEqual(parseNostrUrl(`${npub}/projeto`), {
+  assert.deepEqual(parseNostrUrl(`${npub}/project`), {
     identity: npub,
-    project: 'projeto',
+    project: 'project',
   });
-  assert.deepEqual(parseNostrUrl(`nostr://${npub}/projeto`), {
+  assert.deepEqual(parseNostrUrl(`nostr://${npub}/project`), {
     identity: npub,
-    project: 'projeto',
+    project: 'project',
   });
-  assert.deepEqual(parseNostrUrl(`ngit://${npub}/projeto/`), {
+  assert.deepEqual(parseNostrUrl(`ngit://${npub}/project/`), {
     identity: npub,
-    project: 'projeto',
+    project: 'project',
   });
 });
 
-test('parseNostrUrl rejeita endereço incompleto', () => {
-  assert.throws(() => parseNostrUrl('npub1semprojeto'), /formato/i);
+test('parseNostrUrl rejects incomplete addresses', () => {
+  assert.throws(() => parseNostrUrl('npub1noproject'), /format/i);
 });
 
-test('normalização de relays e pubkeys', () => {
+test('relay and pubkey normalization', () => {
   assert.equal(normalizeRelayUrl('relay.damus.io'), 'wss://relay.damus.io');
   assert.equal(normalizeRelayUrl('https://relay.damus.io/'), 'wss://relay.damus.io');
   assert.equal(
@@ -40,7 +40,7 @@ test('normalização de relays e pubkeys', () => {
   );
 });
 
-test('evento de estado preserva branch, commit e blobs', () => {
+test('state event keeps branch, commit and blobs', () => {
   const template = buildStateTemplate({
     project: 'demo',
     branch: 'main',
@@ -78,12 +78,12 @@ test('evento de estado preserva branch, commit e blobs', () => {
   ]);
 });
 
-test('evento de anúncio preserva nome, descrição e servidores', () => {
+test('announcement event keeps name, description and servers', () => {
   const template = buildAnnouncementTemplate({
     project: 'demo',
     pubkey: 'e'.repeat(64),
     npub: 'npub1demo',
-    description: 'Projeto de teste',
+    description: 'Test project',
     relays: ['wss://relay.damus.io'],
     blossomServers: ['https://blossom.primal.net'],
     createdAt: 1700000001,
@@ -95,20 +95,20 @@ test('evento de anúncio preserva nome, descrição e servidores', () => {
     sig: 'f'.repeat(128),
   });
   assert.equal(announcement.project, 'demo');
-  assert.equal(announcement.description, 'Projeto de teste');
+  assert.equal(announcement.description, 'Test project');
   assert.deepEqual(announcement.relays, ['wss://relay.damus.io']);
   assert.deepEqual(announcement.blossomServers, ['https://blossom.primal.net']);
 });
 
-test('MIME reconhece dotfiles e arquivos comuns', () => {
+test('MIME recognizes dotfiles and common files', () => {
   assert.match(mimeForPath('.gitignore'), /^text\/plain/);
   assert.match(mimeForPath('README.md'), /^text\/markdown/);
   assert.match(mimeForPath('src/index.js'), /^text\/javascript/);
-  assert.equal(mimeForPath('imagem.png'), 'image/png');
+  assert.equal(mimeForPath('image.png'), 'image/png');
 });
 
-test('nomes de projeto são sanitizados e validados', () => {
-  assert.equal(sanitizeProjectName('Meu Projeto!'), 'Meu-Projeto');
-  assert.equal(validateProjectName('meu-projeto_2.0'), 'meu-projeto_2.0');
-  assert.throws(() => validateProjectName('nome/com/barra'), /inválido/i);
+test('project names are sanitized and validated', () => {
+  assert.equal(sanitizeProjectName('My Project!'), 'My-Project');
+  assert.equal(validateProjectName('my-project_2.0'), 'my-project_2.0');
+  assert.throws(() => validateProjectName('name/with/slash'), /invalid/i);
 });

@@ -1,13 +1,13 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="dark" />
-    <title>ngit — Git no Nostr</title>
+    <title>ngit — Git on Nostr</title>
     <meta
       name="description"
-      content="Navegue por repositórios Git descentralizados publicados no Nostr e armazenados no Blossom."
+      content="Browse decentralized Git repositories published on Nostr and stored on Blossom."
     />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/assets/styles.css" />
@@ -15,7 +15,7 @@
   <body>
     <header class="topbar">
       <div class="topbar-inner">
-        <a class="brand" href="#/" aria-label="ngit início">
+        <a class="brand" href="#/" aria-label="ngit home">
           <span class="brand-mark" aria-hidden="true">
             <svg viewBox="0 0 32 32" role="img">
               <circle cx="16" cy="16" r="11" />
@@ -35,14 +35,14 @@
           <input
             id="top-search-input"
             type="search"
-            placeholder="npub1.../projeto"
-            aria-label="Buscar repositório"
+            placeholder="npub1.../project"
+            aria-label="Search repository"
             spellcheck="false"
           />
         </form>
 
         <nav class="topnav">
-          <a href="#/explore">Explorar</a>
+          <a href="#/explore">Explore</a>
           <span class="me-chip" id="me-chip"></span>
         </nav>
       </div>
@@ -53,8 +53,8 @@
     <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <footer class="footer">
-      <span><strong>ngit</strong> · Git descentralizado sobre Nostr + Blossom</span>
-      <span class="footer-dim">Os dados pertencem à sua chave.</span>
+      <span><strong>ngit</strong> · Decentralized Git on Nostr + Blossom</span>
+      <span class="footer-dim">The data belongs to your key.</span>
     </footer>
 
     <script type="module" src="/assets/app.js"></script>

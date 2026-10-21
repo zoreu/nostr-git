@@ -20,15 +20,15 @@ export async function initCommand(args) {
     if (code !== 0) {
       code = await runGitInteractive(['init'], { cwd });
     }
-    if (code !== 0) throw new Error('Não foi possível inicializar o repositório Git.');
+    if (code !== 0) throw new Error('Could not initialize the Git repository.');
     root = cwd;
   } else if (path.resolve(cwd) !== path.resolve(root)) {
     throw new Error(
-      `Você já está dentro de um repositório em ${root}. Rode ngit init na raiz do projeto.`
+      `You are already inside a repository at ${root}. Run ngit init at the project root.`
     );
   } else {
     const code = await runGitInteractive(['init'], { cwd: root });
-    if (code !== 0) throw new Error('Não foi possível inicializar o repositório Git.');
+    if (code !== 0) throw new Error('Could not initialize the Git repository.');
   }
 
   ensureNgitExcluded(root);
@@ -45,10 +45,10 @@ export async function initCommand(args) {
   });
 
   console.log('');
-  success(`Repositório ngit configurado: ${ui.bold(`${config.owner || 'local'}/${project}`)}`);
-  info(`  ${ui.dim('raiz:')}      ${root}`);
+  success(`ngit repository configured: ${ui.bold(`${config.owner || 'local'}/${project}`)}`);
+  info(`  ${ui.dim('root:')}       ${root}`);
   info(`  ${ui.dim('metadata:')}  ${path.join(root, '.ngit', 'repo.json')}`);
   info('');
-  info(`${ui.dim('Próximos passos:')} ngit login, ngit add ., ngit commit -m "primeiro commit"`);
+  info(`${ui.dim('Next steps:')} ngit login, ngit add ., ngit commit -m "first commit"`);
 }
 

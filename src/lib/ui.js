@@ -104,7 +104,7 @@ export function promptSecret(question) {
     const cancel = () => {
       if (settled) return;
       cleanup();
-      const error = new Error('Login cancelado.');
+      const error = new Error('Login cancelled.');
       error.ngitHandled = true;
       reject(error);
     };
@@ -172,7 +172,7 @@ export function openBrowser(url) {
 }
 
 export function printBanner() {
-  console.log(`${ui.magenta('nostr')}${ui.bold('-git')} ${ui.dim('· git descentralizado no Nostr + Blossom')}`);
+  console.log(`${ui.magenta('nostr')}${ui.bold('-git')} ${ui.dim('· decentralized git on Nostr + Blossom')}`);
 }
 
 export function createProgress(label, total) {
