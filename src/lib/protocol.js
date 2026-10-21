@@ -126,7 +126,7 @@ export function buildAnnouncementTemplate({
   const tags = makeClientTags([
     ['d', project],
     ['name', project],
-    ['description', description || 'Decentralized Git repository via Nostr + Blossom'],
+    ['description', description || ''],
     ['clone', `nostr://${npub}/${project}`],
     ['relays', ...relays],
     ...blossomServers.map((server) => ['blossom', server]),
@@ -139,7 +139,7 @@ export function buildAnnouncementTemplate({
     kind: REPO_ANNOUNCEMENT_KIND,
     created_at: createdAt,
     tags,
-    content: description || 'Decentralized Git repository via Nostr + Blossom',
+    content: description || '',
   };
 }
 

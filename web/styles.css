@@ -168,6 +168,44 @@ svg {
   font-size: 13px;
 }
 
+.filter-bar {
+  position: relative;
+  max-width: 430px;
+  margin: 0 0 18px;
+}
+
+.filter-bar svg {
+  position: absolute;
+  top: 50%;
+  left: 11px;
+  width: 15px;
+  height: 15px;
+  color: var(--muted);
+  transform: translateY(-50%);
+}
+
+.filter-bar input {
+  width: 100%;
+  height: 34px;
+  padding: 0 12px 0 34px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  outline: none;
+  background: var(--bg-soft);
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12.5px;
+}
+
+.filter-bar input:focus {
+  border-color: var(--accent-2);
+  box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.15);
+}
+
+.repo-card[hidden] {
+  display: none;
+}
+
 .topnav a {
   color: var(--muted);
 }

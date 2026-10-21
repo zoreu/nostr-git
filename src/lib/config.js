@@ -174,6 +174,17 @@ export function sanitizeProjectName(value) {
   return cleaned || 'repository';
 }
 
+export const DESCRIPTION_MAX_LENGTH = 300;
+
+export function validateDescription(value) {
+  if (value === undefined || value === null) return '';
+  const text = String(value).replace(/\s*\n\s*/g, ' ').trim();
+  if (text.length > DESCRIPTION_MAX_LENGTH) {
+    throw new Error(`Description too long (max ${DESCRIPTION_MAX_LENGTH} characters).`);
+  }
+  return text;
+}
+
 export function validateProjectName(value) {
   if (!value || !/^[a-zA-Z0-9._-]{1,80}$/.test(value)) {
     throw new Error(

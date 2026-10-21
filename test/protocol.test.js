@@ -9,7 +9,7 @@ import {
 } from '../src/lib/protocol.js';
 import { mimeForPath } from '../src/lib/manifest.js';
 import { normalizeRelayUrl, normalizePubkey } from '../src/lib/nostr.js';
-import { sanitizeProjectName, validateProjectName } from '../src/lib/config.js';
+import { sanitizeProjectName, validateDescription, validateProjectName } from '../src/lib/config.js';
 
 test('parseNostrUrl accepts nostr://, ngit:// and plain paths', () => {
   const npub = 'npub1vnd9csl58a9rvngvndf0pmuww0cesrqu4wefkh80tx5ca6n4dfzshpfwv6';
@@ -111,4 +111,26 @@ test('project names are sanitized and validated', () => {
   assert.equal(sanitizeProjectName('My Project!'), 'My-Project');
   assert.equal(validateProjectName('my-project_2.0'), 'my-project_2.0');
   assert.throws(() => validateProjectName('name/with/slash'), /invalid/i);
+});
+
+test('announcements without description stay empty (no default)', () => {
+  const template = buildAnnouncementTemplate({
+    project: 'demo',
+    pubkey: 'e'.repeat(64),
+    npub: 'npub1demo',
+    relays: ['wss://relay.damus.io'],
+    blossomServers: ['https://blossom.primal.net'],
+    createdAt: 1700000002,
+  });
+  assert.equal(template.content, '');
+  assert.deepEqual(template.tags.find((tag) => tag[0] === 'description'), [
+    'description',
+    '',
+  ]);
+});
+
+test('descriptions are trimmed, single-line and length limited', () => {
+  assert.equal(validateDescription('  my\ndescription '), 'my description');
+  assert.throws(() => validateDescription('a'.repeat(301)), /Description/i);
+  assert.equal(validateDescription('a'.repeat(300)), 'a'.repeat(300));
 });

@@ -9,11 +9,12 @@ const HELP = `
 ${ui.bold('Usage:')} ngit <command> [options]
 
 ${ui.bold('Commands:')}
-  ${ui.cyan('init')} [project]                     Initializes Git and the ngit metadata
+  ${ui.cyan('init')} [project] [-d "description"]    Initializes Git and the ngit metadata
   ${ui.cyan('login')} [--generate]                 Saves your Nostr identity (nsec)
   ${ui.cyan('add')} <files...>                     Adds files to the Git index
   ${ui.cyan('commit')} [-m "message"]              Creates a commit
   ${ui.cyan('push')}                               Publishes commits, bundle and files to Nostr/Blossom
+  ${ui.cyan('describe')} "text" [--clear]          Updates the repository description and republishes it
   ${ui.cyan('clone')} <npub.../project> [folder]   Clones a repository from Nostr
   ${ui.cyan('version')} <sub>                      Creates/lists versions and switches to a version or hash
   ${ui.cyan('branch')} <sub>                       List/create/switch branch
@@ -38,7 +39,8 @@ ${ui.bold('Version options:')}
   See all details with: ngit version help
 
 ${ui.bold('Examples:')}
-  ngit init
+  ngit init -d "My decentralized project"
+  ngit describe "A tool for publishing on Nostr"
   ngit login --generate
   ngit add .
   ngit commit -m "first commit"
@@ -106,6 +108,11 @@ export async function main(argv) {
     case 'push': {
       const { pushCommand } = await import('./commands/push.js');
       await pushCommand(args);
+      break;
+    }
+    case 'describe': {
+      const { describeCommand } = await import('./commands/describe.js');
+      await describeCommand(args);
       break;
     }
     case 'clone': {

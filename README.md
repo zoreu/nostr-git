@@ -94,7 +94,7 @@ ngit login \
 
 ```bash
 cd my-project
-ngit init
+ngit init -d "My decentralized project"
 ngit add .
 ngit commit -m "first commit"
 ngit push
@@ -136,6 +136,23 @@ ngit clone npub1.../my-project other-folder
 
 `clone` requires no login: anyone with the `npub` can download the public repository.
 
+### 3.1 Repository description
+
+There is no default description: if none is given, the announcement is published with an empty description. Set it at creation time:
+
+```bash
+ngit init -d "A command line tool for Nostr"
+```
+
+Update it at any time (this republishes the announcement on the relays instantly — no push needed):
+
+```bash
+ngit describe "A faster command line tool for Nostr"
+ngit describe --clear
+```
+
+To change the description of a cloned repository you own, run `ngit describe` at its root.
+
 ### 4. Browse on the web
 
 ```bash
@@ -144,7 +161,8 @@ ngit web
 
 Opens `http://127.0.0.1:3737` in your browser with:
 
-- your repositories;
+- your repositories, with a filter box by name/description;
+- a global search (name, description, npub or project), like GitHub's search;
 - discovery of recent repositories on the relays;
 - file tree;
 - code and image viewing;
@@ -168,7 +186,7 @@ ngit web --port 4000 --host 127.0.0.1 --no-open
 
 | Command | Description |
 | --- | --- |
-| `ngit init [project]` | Initializes Git and the `.ngit/` metadata |
+| `ngit init [project] [-d "desc"]` | Initializes Git and the `.ngit/` metadata |
 | `ngit login [--generate]` | Saves or creates your Nostr identity |
 | `ngit whoami` | Shows the logged-in identity |
 | `ngit add <files...>` | Adds files to the Git index |
@@ -176,6 +194,7 @@ ngit web --port 4000 --host 127.0.0.1 --no-open
 | `ngit version [create/list/switch]` | Creates/lists versions and switches to a version or hash |
 | `ngit branch [list/new/switch]` | List/create/switch branch |
 | `ngit push` | Publishes commits, bundle, manifest and files |
+| `ngit describe "text" [--clear]` | Updates the repository description and republishes it |
 | `ngit clone <npub.../project> [folder]` | Clones a repository from Nostr |
 | `ngit web [npub.../project]` | Opens the local web interface |
 | `ngit help` | Shows help |
@@ -346,7 +365,7 @@ Structure:
 
 ```
 bin/            CLI entry point
-src/commands/   init, login, add, commit, push, clone, version, web
+src/commands/   init, login, add, commit, push, describe, clone, version, web
 src/lib/        Git, Nostr, Blossom, protocol, manifest, semver and web server
 web/            HTML/CSS/JS interface
 test/           unit tests

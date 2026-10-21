@@ -1,16 +1,35 @@
 import path from 'node:path';
+
 import {
   loadRepoConfig,
   sanitizeProjectName,
   saveRepoConfig,
+  validateDescription,
   validateProjectName,
 } from '../lib/config.js';
 import { ensureGitInstalled, ensureNgitExcluded, findRepoRoot, runGitInteractive } from '../lib/git.js';
 import { info, success, ui } from '../lib/ui.js';
 
+function parseDescriptionArg(args) {
+  let text = '';
+  for (let index = 0; index < args.length; index += 1) {
+    const arg = args[index];
+    if (arg === '-d' || arg === '--description' || arg.startsWith('--description=')) {
+      const inline =
+        arg.startsWith('--description=') && arg.length > '--description='.length
+          ? arg.slice('--description='.length)
+          : null;
+      index += 1;
+      text = inline ?? args[index] ?? '';
+    }
+  }
+  return validateDescription(text);
+}
+
 export async function initCommand(args) {
   await ensureGitInstalled();
 
+  const description = parseDescriptionArg(args);
   const projectArg = args.find((arg) => !arg.startsWith('-'));
   const cwd = process.cwd();
   let root = await findRepoRoot(cwd);
@@ -41,6 +60,7 @@ export async function initCommand(args) {
     ...(existing || {}),
     version: 1,
     project,
+    description,
     createdAt: existing?.createdAt || new Date().toISOString(),
   });
 
@@ -48,6 +68,9 @@ export async function initCommand(args) {
   success(`ngit repository configured: ${ui.bold(`${config.owner || 'local'}/${project}`)}`);
   info(`  ${ui.dim('root:')}       ${root}`);
   info(`  ${ui.dim('metadata:')}  ${path.join(root, '.ngit', 'repo.json')}`);
+  if (description) {
+    info(`  ${ui.dim('description:')} ${description}`);
+  }
   info('');
   info(`${ui.dim('Next steps:')} ngit login, ngit add ., ngit commit -m "first commit"`);
 }

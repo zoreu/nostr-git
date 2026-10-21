@@ -19,6 +19,7 @@ const ICONS = {
   download: 'M2.75 14A1.75 1.75 0 0 1 1 12.25v-2.5a.75.75 0 0 1 1.5 0v2.5c0 .138.112.25.25.25h10.5a.25.25 0 0 0 .25-.25v-2.5a.75.75 0 0 1 1.5 0v2.5A1.75 1.75 0 0 1 13.25 14Zm4.5-5.81V1.75a.75.75 0 0 1 1.5 0v6.44l1.97-1.97a.75.75 0 1 1 1.06 1.06l-3.25 3.25a.75.75 0 0 1-1.06 0L4.22 7.28a.75.75 0 0 1 1.06-1.06Z',
   arrowLeft: 'M7.78 12.53a.75.75 0 0 1-1.06 0L2.47 8.28a.75.75 0 0 1 0-1.06l4.25-4.25a.751.751 0 0 1 1.042.018.751.751 0 0 1 .018 1.042L4.81 7h7.44a.75.75 0 0 1 0 1.5H4.81l2.97 2.97a.75.75 0 0 1 0 1.06Z',
   terminal: 'M0 2.75C0 1.784.784 1 1.75 1h12.5c.966 0 1.75.784 1.75 1.75v10.5A1.75 1.75 0 0 1 14.25 15H1.75A1.75 1.75 0 0 1 0 13.25Zm1.75-.25a.25.25 0 0 0-.25.25v10.5c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25V2.75a.25.25 0 0 0-.25-.25ZM7.25 8a.75.75 0 0 1-.22.53l-2.25 2.25a.751.751 0 0 1-1.042-.018.751.751 0 0 1-.018-1.042L5.69 8 3.72 6.03a.75.75 0 0 1 1.06-1.06l2.25 2.25c.141.14.22.331.22.53Zm1.5 1.5h3a.75.75 0 0 1 0 1.5h-3a.75.75 0 0 1 0-1.5Z',
+  search: 'M10.68 11.74a6 6 0 0 1-7.922-8.982 6 6 0 0 1 8.982 7.922l3.04 3.04a.749.749 0 0 1-.326 1.275.749.749 0 0 1-.734-.215ZM11.5 7a4.499 4.499 0 1 0-8.997 0A4.499 4.499 0 0 0 11.5 7Z',
 };
 
 function icon(name, className = '') {
@@ -231,8 +232,10 @@ function repoAvatar() {
 }
 
 function repoCard(repo) {
+  const filterText = `${repo.name || repo.project} ${repo.description || ''} ${repo.npub || ''}`
+    .toLowerCase();
   return `
-    <a class="repo-card" href="${repoHash(repo.npub, repo.project)}">
+    <a class="repo-card" href="${repoHash(repo.npub, repo.project)}" data-filter="${escapeHtml(filterText)}">
       <div class="repo-card-top">
         ${repoAvatar()}
         <div class="repo-card-name">
@@ -249,8 +252,10 @@ function repoCard(repo) {
   `;
 }
 
-function repoGrid(repos) {
-  return `<div class="repo-grid">${repos.map((repo) => repoCard(repo)).join('')}</div>`;
+function repoGrid(repos, { id = '' } = {}) {
+  return `<div class="repo-grid"${id ? ` id="${id}"` : ''}>${repos
+    .map((repo) => repoCard(repo))
+    .join('')}</div>`;
 }
 
 function emptyRepos(title, command) {
@@ -325,19 +330,30 @@ async function renderHome(token) {
       </aside>
     </section>
 
-    <section class="section">
+    <section class="section" id="own-section">
       <div class="section-head">
         <h2>Your repositories</h2>
         <p>${me.npub ? escapeHtml(shortNpub(me.npub)) : 'log in with ngit login to see your identity'}</p>
       </div>
       ${
         me.npub
-          ? own.repos.length
-            ? repoGrid(own.repos)
-            : emptyRepos(
-                'No repository published with this identity.',
-                'Run <code>ngit push</code> inside a project to publish.'
-              )
+          ? `
+      ${
+        own.repos.length
+          ? `<form class="filter-bar" id="own-filter-bar" autocomplete="off">
+              <svg viewBox="0 0 16 16" aria-hidden="true"><path d="${ICONS.search}"/></svg>
+              <input id="own-filter" type="search" placeholder="Filter your repositories by name or description..." spellcheck="false" />
+            </form>`
+          : ''
+      }
+      ${
+        own.repos.length
+          ? repoGrid(own.repos, { id: 'own-grid' })
+          : emptyRepos(
+              'No repository published with this identity.',
+              'Run <code>ngit push</code> inside a project to publish.'
+            )
+      }`
           : emptyRepos(
               'No identity connected.',
               'In the terminal, run <code>ngit login</code> or <code>ngit login --generate</code>.'
@@ -362,6 +378,8 @@ async function renderHome(token) {
 
     ${steps()}
   `;
+
+  bindRepoFilter(document.getElementById('own-filter'), document.getElementById('own-grid'));
 }
 
 async function renderExplore(token) {
@@ -798,17 +816,52 @@ async function renderRepo(route, token) {
   `;
 }
 
+function bindRepoFilter(input, grid) {
+  if (!input || !grid) return;
+  const cards = [...grid.querySelectorAll('.repo-card')];
+  const apply = () => {
+    const query = input.value.trim().toLowerCase();
+    const tokens = query.split(/\s+/).filter(Boolean);
+    let visible = 0;
+    for (const card of cards) {
+      const text = card.dataset.filter || '';
+      const match = tokens.every((token) => text.includes(token));
+      card.hidden = !match;
+      if (match) visible += 1;
+    }
+    const empty = grid.querySelector('.grid-empty-message');
+    if (empty) empty.remove();
+    if (visible === 0) {
+      grid.insertAdjacentHTML(
+        'beforeend',
+        '<div class="empty-state grid-empty-message"><strong>Nothing found.</strong><span>No repository matches the filter.</span></div>'
+      );
+    }
+  };
+  input.addEventListener('input', apply);
+}
+
+function parseHashQuery(raw) {
+  const question = raw.indexOf('?');
+  if (question === -1) return { path: raw, params: new URLSearchParams() };
+  return { path: raw.slice(0, question), params: new URLSearchParams(raw.slice(question + 1)) };
+}
+
 function parseHash() {
   const raw = location.hash.replace(/^#/, '') || '/';
-  let parts;
   try {
-    parts = raw.split('/').filter(Boolean).map((part) => decodeURIComponent(part));
+    const { path, params } = parseHashQuery(raw);
+    const parts = path.split('/').filter(Boolean).map((part) => decodeURIComponent(part));
+    return finalizeParts(parts, params);
   } catch {
     return { name: 'error', message: 'Invalid URL.' };
   }
+}
 
+function finalizeParts(parts, params) {
   if (parts.length === 0) return { name: 'home' };
   if (parts[0] === 'explore') return { name: 'explore' };
+  if (parts[0] === 'search') return { name: 'search', q: params.get('q') || '' };
 
   const npub = parts[0];
   const project = parts[1];
@@ -849,6 +902,12 @@ async function renderRoute() {
       return;
     }
 
+    if (route.name === 'search') {
+      topSearchInput.value = route.q || '';
+      await renderSearchPage(token, route.q);
+      return;
+    }
+
     if (route.name === 'repo') {
       if (route.npub) topSearchInput.value = `${route.npub}/${route.project}`;
       await renderRepo(route, token);
@@ -880,6 +939,54 @@ async function renderRoute() {
   }
 }
 
+function searchHash(query) {
+  return `#/search?q=${encodeURIComponent(String(query || '').trim())}`;
+}
+
+async function renderSearchPage(token, query) {
+  setDocumentTitle(query ? `Search: ${query}` : 'Search');
+  app.innerHTML = loadingView();
+  await getMe().catch(() => {});
+
+  const value = String(query || '').trim();
+  if (!value) {
+    app.innerHTML = `
+      <div class="page-title">
+        <h1>Search repositories</h1>
+        <p>Type a name, description, topic or npub to search across the relays.</p>
+      </div>
+      ${emptyRepos('Nothing to search yet.', 'Try "blog", "nostr" or npub1.../project.')}
+    `;
+    return;
+  }
+
+  let data;
+  try {
+    data = await fetchJson(`/api/search?q=${encodeURIComponent(value)}&limit=48`);
+  } catch (error) {
+    if (token !== renderToken) return;
+    app.innerHTML = errorView('Search failed', error.message || String(error));
+    setDocumentTitle('Search error');
+    return;
+  }
+  if (token !== renderToken) return;
+
+  app.innerHTML = `
+    <div class="page-title">
+      <h1>Search repositories</h1>
+      <p>${data.repos.length} result(s) for <strong>${escapeHtml(value)}</strong> on the configured relays.</p>
+    </div>
+    ${
+      data.repos.length
+        ? repoGrid(data.repos)
+        : emptyRepos(
+            'No repository found.',
+            'Search on more relays by running the web server with more relays configured (NGIT_RELAYS).'
+          )
+    }
+  `;
+}
+
 function navigateFromSearch(value) {
   let raw = String(value || '').trim();
   if (!raw) return;
@@ -897,12 +1004,12 @@ function navigateFromSearch(value) {
     return;
   }
 
-  if (meCache?.npub) {
-    location.hash = `#/${encodeURIComponent(meCache.npub)}/${encodeURIComponent(raw)}`;
+  if (/^(npub1|naddr1|nevent1|nprofile1)/i.test(raw)) {
+    toast('Also provide the project: npub1.../project', 'err');
     return;
   }
 
-  toast('Also provide the npub: npub1.../project', 'err');
+  location.hash = searchHash(raw);
 }
 
 topSearch.addEventListener('submit', (event) => {

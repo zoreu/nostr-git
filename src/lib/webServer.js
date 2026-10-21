@@ -265,9 +265,8 @@ export function createWebApp({ relays, blossomServers }) {
     response.end(payload);
   }
 
-  async function listRepos(filter, limit) {
-    const queryFilter = { ...filter, limit: Math.max(limit * 4, 80) };
-    const result = await queryEvents(relays, queryFilter, { timeoutMs: 8000 });
+  async function collectRepos(filter, fetchLimit) {
+    const result = await queryEvents(relays, { ...filter, limit: fetchLimit }, { timeoutMs: 8000 });
     const seen = new Map();
     for (const event of result.events) {
       const parsed = parseAnnouncementEvent(event);
@@ -277,11 +276,42 @@ export function createWebApp({ relays, blossomServers }) {
       const current = seen.get(key);
       if (!current || parsed.createdAt > current.createdAt) seen.set(key, parsed);
     }
-    const repos = [...seen.values()]
-      .sort((a, b) => b.createdAt - a.createdAt)
+    const entries = [...seen.values()].sort((a, b) => b.createdAt - a.createdAt);
+    return { entries, relays: result.relays };
+  }
+
+  async function listRepos(filter, limit) {
+    const { entries, relays: relayReports } = await collectRepos(filter, Math.max(limit * 4, 80));
+    return {
+      repos: entries.slice(0, limit).map((announcement) => repoSummary(announcement, announcement.pubkey)),
+      relays: relayReports,
+    };
+  }
+
+  async function searchRepos(query, limit) {
+    if (!query) return { repos: [], relays: [], query };
+    const { entries, relays: relayReports } = await collectRepos(
+      { kinds: [REPO_ANNOUNCEMENT_KIND] },
+      200
+    );
+    const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
+    const repos = entries
+      .filter((entry) => {
+        const summary = repoSummary(entry, entry.pubkey);
+        const haystack = [
+          summary.name,
+          summary.project,
+          summary.description,
+          summary.npub,
+          entry.relays.join(' '),
+        ]
+          .join(' ')
+          .toLowerCase();
+        return tokens.every((token) => haystack.includes(token));
+      })
       .slice(0, limit)
-      .map((announcement) => repoSummary(announcement, announcement.pubkey));
-    return { repos, relays: result.relays };
+      .map((entry) => repoSummary(entry, entry.pubkey));
+    return { repos, relays: relayReports, query };
   }
 
   const server = createServer(async (request, response) => {
@@ -362,6 +392,14 @@ export function createWebApp({ relays, blossomServers }) {
           },
           limit
         );
+        sendJson(response, 200, result);
+        return;
+      }
+
+      if (endpoint === 'search') {
+        const query = String(requestUrl.searchParams.get('q') || '').trim();
+        const limit = Math.min(Number(requestUrl.searchParams.get('limit')) || 30, 60);
+        const result = await searchRepos(query, limit);
         sendJson(response, 200, result);
         return;
       }
