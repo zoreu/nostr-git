@@ -35,6 +35,12 @@ ngit web
 
 ## Instalação
 
+Via npm:
+
+```bash
+npm install -g nostr-git
+```
+
 Direto do GitHub:
 
 ```bash
